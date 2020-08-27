@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settingLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <CheckBox
+        android:id="@+id/checkBoxSetVisibleWind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:checked="true"
+        android:text="@string/checkbox_set_visible_wind"
+        style="@style/Text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <CheckBox
+        android:id="@+id/checkBoxSetVisiblePressure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/checkbox_set_visible_pressure"
+        style="@style/Text"
+        app:layout_constraintStart_toStartOf="@+id/checkBoxSetVisibleWind"
+        app:layout_constraintTop_toBottomOf="@+id/checkBoxSetVisibleWind" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switchSetLightDarkTheme"
+        style="@style/MarginStartEndWithTextSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/dark_theme"
+        app:layout_constraintTop_toBottomOf="@+id/seekBarCountHoursBetweenForecasts"
+        tools:layout_editor_absoluteX="16dp" />
+
+    <TextView
+        android:id="@+id/textCountHoursBetweenForecasts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_count_hours_between_forecasts"
+        style="@style/Text"
+        app:layout_constraintStart_toStartOf="@+id/checkBoxSetVisiblePressure"
+        app:layout_constraintTop_toBottomOf="@+id/checkBoxSetVisiblePressure" />
+
+    <SeekBar
+        android:id="@+id/seekBarCountHoursBetweenForecasts"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:max="2"
+        android:progress="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textCountHoursBetweenForecasts" />
+
+    <TextView
+        android:id="@+id/textValueCountHoursBetweenForecasts"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+        android:text="@string/value_count_hours_between_forecasts"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.166"
+        app:layout_constraintStart_toEndOf="@+id/textCountHoursBetweenForecasts"
+        app:layout_constraintTop_toTopOf="@+id/textCountHoursBetweenForecasts" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
