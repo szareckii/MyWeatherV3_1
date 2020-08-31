@@ -1,0 +1,81 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
+    <style name="AppDarkTheme" parent="Theme.MaterialComponents">
+        <!--        <item name="colorPrimary">@color/colorPrimaryDarkTheme</item>-->
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkDarkTheme</item>
+        <item name="colorAccent">@color/colorAccentDarkTheme</item>
+        <item name="android:textColorPrimary">@color/textViewColorDarkTheme</item>
+
+        <item name="colorOnSurface">@color/colorAccentDarkTheme</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Text">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="SmallText">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="MarginStartEndWithTextSize" parent="Text">
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+    </style>
+
+    <style name="MarginStartEnd" parent="Text">
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
+
+    <style name="MarginWithSize" parent="MarginStartEndWithTextSize">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <style name="Padding" parent="Text">
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+
+    <style name="Gravity">
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="GravityWithTextSize" parent="Gravity">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="GravityWithLargeTextSize" parent="Gravity">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="GravityWithSmallTextSize" parent="Gravity">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Margin">
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
+</resources>

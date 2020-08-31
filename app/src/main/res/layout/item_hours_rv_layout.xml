@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/listHoursItemLayout"
+    android:layout_width="50dp"
+    android:layout_marginStart="10dp"
+    android:layout_height="match_parent"
+    android:weightSum="3"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/itemHourTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        style="@style/GravityWithTextSize"
+        tools:text="@string/itemTextInRV" />
+
+    <ImageView
+        android:id="@+id/typeHourImageView"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        style="@style/Gravity"
+        android:layout_weight="1"
+        android:contentDescription="@string/todo" />
+
+    <TextView
+        android:id="@+id/itemTempHourTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        style="@style/GravityWithTextSize"
+        tools:text="@string/itemTextInRV" />
+
+</LinearLayout>
