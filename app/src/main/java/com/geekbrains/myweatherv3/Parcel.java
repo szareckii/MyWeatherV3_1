@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class Parcel implements Serializable {
     private String cityName;
@@ -15,6 +16,8 @@ public class Parcel implements Serializable {
     private float lon;
     private float lat;
     private String currentFragmentName;
+
+    private Stack<Fragment> fragmentStack;
 
     public String getCurrentFragmentName() {
         return currentFragmentName;
@@ -89,7 +92,8 @@ public class Parcel implements Serializable {
     }
 
     public Parcel(String cityName, boolean visibleWind, boolean visiblePressure, int countHoursBetweenForecasts,
-                  boolean darkTheme, ArrayList<String> data, float lon, float lat, String currentFragmentName) {
+                  boolean darkTheme, ArrayList<String> data, float lon, float lat, String currentFragmentName,
+                  Stack<Fragment> fragmentStack) {
         this.cityName = cityName;
         this.visibleWind = visibleWind;
         this.visiblePressure = visiblePressure;
@@ -99,5 +103,14 @@ public class Parcel implements Serializable {
         this.lon = lon;
         this.lat = lat;
         this.currentFragmentName = currentFragmentName;
+        this.fragmentStack = fragmentStack;
+    }
+
+    public Stack<Fragment> getFragmentStack() {
+        return fragmentStack;
+    }
+
+    public void setFragmentStack(Stack<Fragment> fragmentStack) {
+        this.fragmentStack = fragmentStack;
     }
 }

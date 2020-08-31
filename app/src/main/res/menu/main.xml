@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_add_city"
+        android:icon="@android:drawable/ic_menu_add"
+        android:orderInCategory="10"
+        app:showAsAction="ifRoom"
+        android:title="@string/add_city" />
+
     <item
         android:id="@+id/action_city_climate"
-        android:orderInCategory="100"
+        android:orderInCategory="20"
         android:title="@string/about_city_weather"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_yandex"
-        android:orderInCategory="100"
+        android:orderInCategory="30"
         android:title="@string/weather_yandex"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_exit"
-        android:orderInCategory="100"
+        android:orderInCategory="40"
         android:title="@string/exit"
         app:showAsAction="never" />
 </menu>

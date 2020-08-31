@@ -54,7 +54,7 @@
     <string name="todoImageWithOk">Картинка OK</string>
     <string name="weather_from_yandex">Погода от яндекса</string>
     <string name="itemTextInRV">Item text</string>
-    <string name="choose_city">Выберите город</string>
+    <string name="search_history">История поиска</string>
     <string name="ok_button">OK</string>
     <string name="new_city">Новый город</string>
     <string name="check_cityname">Неверный город</string>
@@ -76,7 +76,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Настройки</string>
     <string name="menu_weather">Погода</string>
-    <string name="menu_cities">Города</string>
+    <string name="menu_cities">История поиска</string>
     <string name="menu_settings">Настройки</string>
     <string name="about_developer">О разработчике</string>
     <string name="feedback">Форма обратной связи</string>
@@ -85,4 +85,9 @@
     <string name="about_city_weather">Климат города (Вики)</string>
     <string name="exit">Выход</string>
     <string name="weather_yandex">Погода Яндекса</string>
+    <string name="add_city">Добавить</string>
+    <string name="done">Готово</string>
+    <string name="enter_name">Введите город</string>
+    <string name="exclamation">Ошибка!</string>
+    <string name="press_button">Город не найден. Ошибка подключения!</string>
 </resources>

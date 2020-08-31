@@ -4,9 +4,9 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="textViewColor">#060001</color>
-
     <color name="colorPrimaryDarkTheme">#272727</color>
     <color name="colorPrimaryDarkDarkTheme">#121212</color>
     <color name="colorAccentDarkTheme">#03DAC5</color>
     <color name="textViewColorDarkTheme">#ffffff</color>
+    <color name="textWeekend">#DC1919</color>
 </resources>

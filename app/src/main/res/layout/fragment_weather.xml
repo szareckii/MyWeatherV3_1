@@ -7,6 +7,16 @@
 
     tools:context=".MainActivity">
 
+    <com.geekbrains.myweatherv3.customView.ThermometerView
+        android:id="@+id/thermometerView"
+        android:layout_width="30dp"
+        android:layout_height="103dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/textTempCurrent"
+        app:layout_constraintTop_toTopOf="@+id/textCity"
+        app:level="70" />
+
     <TextView
         android:id="@+id/textCity"
         android:layout_width="wrap_content"
@@ -34,7 +44,6 @@
         android:id="@+id/imageTypsWeather"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginTop="8dp"
         android:contentDescription="@string/todo"
         app:layout_constraintEnd_toEndOf="@+id/textCity"
         app:layout_constraintStart_toStartOf="@+id/textCity"
