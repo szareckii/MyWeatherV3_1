@@ -13,9 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 public class RecyclerDataAdapterForHours extends RecyclerView.Adapter<RecyclerDataAdapterForHours.ViewHolder> {
-    private ArrayList<DataClassOfHours> data;
+    private ArrayList<DataClassOfHoursWithDrawable> data;
 
-    public RecyclerDataAdapterForHours(ArrayList<DataClassOfHours> data) {
+    public RecyclerDataAdapterForHours(ArrayList<DataClassOfHoursWithDrawable> data) {
         if(data != null) {
             this.data = data;
         }

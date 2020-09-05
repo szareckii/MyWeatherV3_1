@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,124 +7,123 @@
 
     tools:context=".MainActivity">
 
-    <com.geekbrains.myweatherv3.customView.ThermometerView
-        android:id="@+id/thermometerView"
-        android:layout_width="30dp"
-        android:layout_height="103dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toStartOf="@+id/textTempCurrent"
-        app:layout_constraintTop_toTopOf="@+id/textCity"
-        app:level="70" />
-
-    <TextView
-        android:id="@+id/textCity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:text="@string/textCity"
-        android:textSize="28sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/textTempCurrent"
-        android:layout_width="87dp"
-        android:layout_height="62dp"
-        android:layout_marginEnd="8dp"
-        android:gravity="end"
-        android:text="@string/textTempCurrent"
-        android:textSize="48sp"
-        app:layout_constraintEnd_toStartOf="@+id/imageTypsWeather"
-        app:layout_constraintTop_toTopOf="@+id/imageTypsWeather" />
-
-
-    <ImageView
-        android:id="@+id/imageTypsWeather"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:contentDescription="@string/todo"
-        app:layout_constraintEnd_toEndOf="@+id/textCity"
-        app:layout_constraintStart_toStartOf="@+id/textCity"
-        app:layout_constraintTop_toBottomOf="@+id/textCity"
-        app:srcCompat="@drawable/ic_launcher_background" />
-
-    <TextView
-        android:id="@+id/textWindNow"
-        style="@style/SmallText"
-        android:layout_width="wrap_content"
-        android:layout_height="19dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="4dp"
-        android:text="@string/textWindPlusOneHour"
-        app:layout_constraintEnd_toStartOf="@+id/textUnitWind"
-        app:layout_constraintTop_toTopOf="@+id/imageTypsWeather" />
-
-    <TextView
-        android:id="@+id/textPressureNow"
-        style="@style/SmallText"
-        android:layout_width="wrap_content"
-        android:layout_height="19dp"
-        android:layout_marginEnd="4dp"
-        android:text="@string/textPressurePlusOneHour"
-        app:layout_constraintEnd_toStartOf="@+id/textUnitPressureNow"
-        app:layout_constraintTop_toTopOf="@+id/textUnitPressureNow" />
-
-    <TextView
-        android:id="@+id/textWindDegree"
-        style="@style/SmallText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="@string/textUnitWindS"
-        app:layout_constraintStart_toEndOf="@+id/textUnitWind"
-        app:layout_constraintTop_toTopOf="@+id/textUnitWind" />
-
-    <TextView
-        android:id="@+id/textUnitWind"
-        style="@style/SmallText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:text="@string/textUnitWind"
-        app:layout_constraintStart_toEndOf="@+id/imageTypsWeather"
-        app:layout_constraintTop_toTopOf="@+id/textWindNow" />
-
-    <TextView
-        android:id="@+id/textUnitPressureNow"
-        style="@style/SmallText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:text="@string/textUnitPressureNow"
-        app:layout_constraintStart_toEndOf="@+id/imageTypsWeather"
-        app:layout_constraintTop_toBottomOf="@+id/textUnitWind" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/daysRecyclerView"
-        style="@style/Margin"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hoursRecyclerView"
-        app:layout_constraintVertical_bias="0.0" />
+        android:layout_height="wrap_content">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/hoursRecyclerView"
-        style="@style/Margin"
-        android:layout_width="match_parent"
-        android:layout_height="115dp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageTypsWeather" />
+        <com.geekbrains.myweatherv3.customview.ThermometerView
+            android:id="@+id/thermometerView"
+            android:layout_width="30dp"
+            android:layout_height="103dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/textTempCurrent"
+            app:layout_constraintTop_toTopOf="@+id/textCity"
+            app:level="70" />
+
+        <TextView
+            android:id="@+id/textCity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="@string/textCity"
+            android:textSize="@dimen/sizeCityNameLand"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textTempCurrent"
+            android:layout_width="87dp"
+            android:layout_height="62dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="end"
+            android:text="@string/textTempCurrent"
+            android:textSize="48sp"
+            app:layout_constraintEnd_toStartOf="@+id/imageTypsWeather"
+            app:layout_constraintTop_toTopOf="@+id/imageTypsWeather" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/imageTypsWeather"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:contentDescription="@string/todo"
+            app:layout_constraintEnd_toEndOf="@+id/textCity"
+            app:layout_constraintStart_toStartOf="@+id/textCity"
+            app:layout_constraintTop_toBottomOf="@+id/textCity"
+            app:srcCompat="@drawable/ic_launcher_background" />
 
+        <TextView
+            android:id="@+id/textWindNow"
+            style="@style/SmallText"
+            android:layout_width="wrap_content"
+            android:layout_height="19dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:text="@string/textWindPlusOneHour"
+            app:layout_constraintEnd_toStartOf="@+id/textUnitWind"
+            app:layout_constraintTop_toTopOf="@+id/imageTypsWeather" />
 
+        <TextView
+            android:id="@+id/textPressureNow"
+            style="@style/SmallText"
+            android:layout_width="wrap_content"
+            android:layout_height="19dp"
+            android:layout_marginEnd="4dp"
+            android:text="@string/textPressurePlusOneHour"
+            app:layout_constraintEnd_toStartOf="@+id/textUnitPressureNow"
+            app:layout_constraintTop_toBottomOf="@+id/textWindNow" />
+
+        <TextView
+            android:id="@+id/textUnitWind"
+            style="@style/SmallText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:text="@string/textUnitWind"
+            app:layout_constraintStart_toEndOf="@+id/imageTypsWeather"
+            app:layout_constraintTop_toTopOf="@+id/textWindNow" />
+
+        <TextView
+            android:id="@+id/textWindDegree"
+            style="@style/SmallText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/textUnitWindS"
+            app:layout_constraintStart_toEndOf="@+id/textUnitWind"
+            app:layout_constraintTop_toTopOf="@+id/textWindNow" />
+
+        <TextView
+            android:id="@+id/textUnitPressureNow"
+            style="@style/SmallText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:text="@string/textUnitPressureNow"
+            app:layout_constraintStart_toEndOf="@+id/imageTypsWeather"
+            app:layout_constraintTop_toTopOf="@+id/textPressureNow" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/hoursRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="95dp"
+            style="@style/Margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageTypsWeather" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/daysRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            style="@style/Margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/hoursRecyclerView"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
 

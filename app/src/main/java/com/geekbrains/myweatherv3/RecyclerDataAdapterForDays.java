@@ -1,23 +1,20 @@
 package com.geekbrains.myweatherv3;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
 public class RecyclerDataAdapterForDays extends RecyclerView.Adapter<RecyclerDataAdapterForDays.ViewHolder> {
-    private ArrayList<DataClassOfDays> data;
+    private ArrayList<DataClassOfDaysWithDrawable> data;
 
-    public RecyclerDataAdapterForDays(ArrayList<DataClassOfDays> data) {
+    public RecyclerDataAdapterForDays(ArrayList<DataClassOfDaysWithDrawable> data) {
         if(data != null) {
             this.data = data;
         }
