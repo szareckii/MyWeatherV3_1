@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -35,7 +36,9 @@ public class RecyclerDataAdapterForHours extends RecyclerView.Adapter<RecyclerDa
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         holder.textHour.setText(data.get(position).textHour);
-        holder.drawableHourImageView.setImageDrawable(data.get(position).drawableHourImageView);
+        Picasso.get()
+                .load(data.get(position).drawableHour)
+                .into(holder.drawableHourImageView);
         holder.texTempHour.setText(data.get(position).texTempHour);
     }
 

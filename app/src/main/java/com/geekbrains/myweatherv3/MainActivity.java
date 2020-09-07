@@ -11,21 +11,25 @@ import androidx.fragment.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.geekbrains.myweatherv3.weatherdata.CityData;
+import com.geekbrains.myweatherv3.model.SearchRequest;
+import com.geekbrains.myweatherv3.weatherdata.CityDataOnlyNeed;
 import com.google.android.material.navigation.NavigationView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.regex.Pattern;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private NavigationView navigationView;
@@ -45,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG_FEEDBACK = "class com.geekbrains.myweatherv3.FeedbackFragment";
     private String cityName;
     private Stack<Fragment> fragmentStack;
+    private OpenWeather openWeather;
+    private String msgError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        msgError = getString(R.string.check_cityname);
+        initRetorfit();
 
         weatherFragment = new WeatherFragment();
         citiesFragment = new CitiesFragment();
@@ -112,11 +121,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setOnClickForSideMenuItems();
-//        setChooseCityBtnEnterClickBehavior();
     }
 
     /*Метод смены темы светлая-темная*/
-
     public void ToggleTheme(boolean isChecked){
         if (isChecked) {
             this.getTheme().applyStyle(R.style.AppDarkTheme, true);
@@ -202,42 +209,9 @@ public class MainActivity extends AppCompatActivity {
                     .setPositiveButton(R.string.done, (dialogInterface, i) -> {
                         EditText editText = contentView.findViewById(R.id.addCityInput);
                         cityName = editText.getText().toString();
-                        String msgError = getString(R.string.check_cityname);
 
                         if (checkCityName.matcher(cityName).matches()) {    // Проверим на основе регулярных выражений
-                            //Есть город есть - узнаем координаты. Если нет - предупреждение
-                            HandlerThread handlerThread = new HandlerThread("one", HandlerThread.NORM_PRIORITY);
-                            handlerThread.start(); // только после этого у потока появится лупер
-                            Handler handler = new Handler(handlerThread.getLooper());
-                            Log.e(TAG, "new Handler()");
-                            new Thread(() -> {
-                                try {
-                                    CityData cityData = new CityData(parcel);
-                                    Log.e(TAG, "cityData.startCityData. start");
-                                    cityData.findCityOnOpenweathermap(cityName);
-
-                                    while (true) {
-//                                        // если город найден то прекращаем ждать завершения работы
-                                        int requestFlag = parcel.getRequestFlag();
-                                        if (requestFlag == 1) {
-                                            Log.e(TAG, "getRequestFlag() == 1");
-                                            parcel.setRequestFlag(0);
-                                            handler.post(this::setWeatherFragment);
-                                            break;
-                                            // если город не найден то выводим сообщение
-                                        } else if (requestFlag == -1) {
-                                            Log.e(TAG, "getRequestFlag() == -1");
-                                            parcel.setRequestFlag(0);
-                                            showToast(msgError);
-                                            break;
-                                        }
-                                    }
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Fail connection", e);
-                                    parcel.setRequestFlag(0);
-                                    e.printStackTrace();
-                                }
-                            }).start();
+                            requestRetrofit(cityName);
                         } else {
                             showToast(msgError);
                         }
@@ -261,8 +235,38 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void initRetorfit() {
+        Retrofit retrofit;
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.openweathermap.org/") // Базовая часть адреса
+                // Конвертер, необходимый для преобразования JSON в объекты
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // Создаём объект, при помощи которого будем выполнять запросы
+        openWeather = retrofit.create(OpenWeather.class);
+    }
+
+    private void requestRetrofit(String city) {
+        openWeather.loadCityCoord(city, BuildConfig.WEATHER_API_KEY, "ru")
+                .enqueue(new Callback<SearchRequest>() {
+                    @Override
+                    public void onResponse(@NonNull Call<SearchRequest> call, @NonNull Response<SearchRequest> response) {
+                        if (response.body() != null && response.isSuccessful()) {
+                            new CityDataOnlyNeed(parcel, response);
+                            setWeatherFragment();
+                        } else {
+                            showToast(getString(R.string.check_cityname));
+                        }
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<SearchRequest> call, @NonNull Throwable t) {
+                        showToast(getString(R.string.check_cityname));
+                    }
+                });
+    }
+
     public void showToast(final String toast) {
-        runOnUiThread(() -> Toast.makeText(MainActivity.this, toast, Toast.LENGTH_SHORT).show());
+        Toast.makeText(MainActivity.this, toast, Toast.LENGTH_SHORT).show();
     }
 
     /*Метод составления http с погодой от яндекса к выбранному городу*/

@@ -2,8 +2,10 @@ package com.geekbrains.myweatherv3;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,11 +19,26 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.TextView;
-import com.geekbrains.myweatherv3.weatherdata.WeatherData;
+import android.widget.Toast;
+import com.geekbrains.myweatherv3.model.WeatherRequest;
+import com.geekbrains.myweatherv3.weatherdata.WeatherDataOnlyNeed;
+import com.squareup.picasso.Downloader;
+import com.squareup.picasso.OkHttp3Downloader;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Objects;
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class WeatherFragment extends Fragment {
     private TextView textTempCurrent;
@@ -38,8 +55,7 @@ public class WeatherFragment extends Fragment {
     private ArrayList<DataClassOfDays> listDays;
     private RecyclerView daysRecyclerView;
     private RecyclerView hoursRecyclerView;
-    int a01n, a02n, a03n, a04n, a09n, a10n, a11n, a13n, a50n;
-    int a01d, a02d, a03d, a04d, a09d, a10d, a11d, a13d, a50d;
+    private OpenWeather openWeather;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -55,35 +71,43 @@ public class WeatherFragment extends Fragment {
         String cityName = parcel.getCityName();
         cityNameView.setText(cityName);
 
-        int countHoursBetweenForecasts = parcel.getCountHoursBetweenForecasts();
-
         findCurrentHour();
 
-        final Handler handler = new Handler(); // Запоминаем основной поток
-        new Thread(() -> {
-            try {
-                WeatherData weatherData = new WeatherData(parcel);
-                weatherData.setWhether();
-                while (true) {
-                    // если город найден то прекращаем ждать завершения работы
-                    if (parcel.getRequestWeatherFlag() == 1) {
-                        Log.e(TAG, "getRequestWeatherFlag() == 1");
-                        parcel.setRequestWeatherFlag(0);
-                        handler.post(() -> setWeatherData(countHoursBetweenForecasts));
-                        break;
-                        // если город не найден то выводим сообщение
-                    } else if (parcel.getRequestWeatherFlag() == -1) {
-                        Log.e(TAG, "getRequestWeatherFlag() == -1");
-                        parcel.setRequestWeatherFlag(0);
-                        break;
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Fail connection", e);
-                e.printStackTrace();
-            }
-        }).start();
+        initRetorfit();
+        requestRetrofit(parcel.getLat(), parcel.getLon());
+
         return layout;
+    }
+
+    private void initRetorfit() {
+        Retrofit retrofit;
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.openweathermap.org/") // Базовая часть адреса
+                // Конвертер, необходимый для преобразования JSON в объекты
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        // Создаём объект, при помощи которого будем выполнять запросы
+        openWeather = retrofit.create(OpenWeather.class);
+    }
+
+    private void requestRetrofit(Float lat, Float lon) {
+        String msgError = getString(R.string.check_weather);
+        openWeather.loadWeather("minutely", "metric", BuildConfig.WEATHER_API_KEY, lat, lon)
+                .enqueue(new Callback<WeatherRequest>() {
+                    @Override
+                    public void onResponse(@NonNull Call<WeatherRequest> call, @NonNull Response<WeatherRequest> response) {
+                        if (response.body() != null && response.isSuccessful()) {
+                            new WeatherDataOnlyNeed(parcel,  response);
+                            setWeatherData(parcel.getCountHoursBetweenForecasts());
+                        } else {
+                                showToast(msgError);
+                        }
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<WeatherRequest> call, @NonNull Throwable t) {
+                            showToast(msgError);
+                    }
+                });
     }
 
     private void setWeatherData(int countHoursBetweenForecasts) {
@@ -92,7 +116,11 @@ public class WeatherFragment extends Fragment {
         textWindNow.setText(parcel.getWindNow());
         textPressureNow.setText(parcel.getPressureNow());
         textWindDegree.setText(getDegreeWind(parcel.getWindDegree()));
-        imageTypesWeather.setImageResource(setIconWeather(parcel.getTypesWeather(), "Current"));
+
+        Picasso.get()
+                .load(setIconWeatherURL(parcel.getTypesWeather()))
+                .into(imageTypesWeather);
+
         textUnitWind.setText(R.string.textUnitWind);
         textUnitPressureNow.setText(R.string.textUnitPressureNow);
 
@@ -122,6 +150,10 @@ public class WeatherFragment extends Fragment {
         listDaysWithDrawable.clear();
         listDaysWithDrawable.addAll(Arrays.asList(dataDays1));
         setupRecyclerViewDays(listDaysWithDrawable);
+    }
+
+    public void showToast(final String toast) {
+        Toast.makeText(getActivity(), toast, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -372,146 +404,145 @@ public class WeatherFragment extends Fragment {
 
         return new DataClassOfHoursWithDrawable[]{
                 new DataClassOfHoursWithDrawable(listHours.get(0).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(0).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(0).drawableHourImageView),
                         listHours.get(0).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(1).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(1).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(1).drawableHourImageView),
                         listHours.get(1).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(2).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(2).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(2).drawableHourImageView),
                         listHours.get(2).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(3).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(3).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(3).drawableHourImageView),
                         listHours.get(3).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(4).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(4).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(4).drawableHourImageView),
                         listHours.get(4).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(5).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(5).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(5).drawableHourImageView),
                         listHours.get(5).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(6).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(6).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(6).drawableHourImageView),
                         listHours.get(6).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(7).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(7).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(7).drawableHourImageView),
                         listHours.get(7).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(8).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(8).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(8).drawableHourImageView),
                         listHours.get(8).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(9).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(9).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(9).drawableHourImageView),
                         listHours.get(9).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(10).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(10).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(10).drawableHourImageView),
                         listHours.get(10).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(11).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(11).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(11).drawableHourImageView),
                         listHours.get(11).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(12).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(12).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(12).drawableHourImageView),
                         listHours.get(12).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(13).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(13).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(13).drawableHourImageView),
                         listHours.get(13).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(14).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(14).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(14).drawableHourImageView),
                         listHours.get(14).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(15).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(15).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(15).drawableHourImageView),
                         listHours.get(15).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(16).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(16).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(16).drawableHourImageView),
                         listHours.get(16).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(17).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(17).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(17).drawableHourImageView),
                         listHours.get(17).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(18).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(18).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(18).drawableHourImageView),
                         listHours.get(18).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(19).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(19).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(19).drawableHourImageView),
                         listHours.get(19).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(20).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(20).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(20).drawableHourImageView),
                         listHours.get(20).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(21).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(21).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(21).drawableHourImageView),
                         listHours.get(21).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(22).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(22).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(22).drawableHourImageView),
                         listHours.get(22).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(23).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(23).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(23).drawableHourImageView),
                         listHours.get(23).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(24).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(24).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(24).drawableHourImageView),
                         listHours.get(24).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(25).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(25).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(25).drawableHourImageView),
                         listHours.get(25).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(26).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(26).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(26).drawableHourImageView),
                         listHours.get(26).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(27).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(27).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(27).drawableHourImageView),
                         listHours.get(27).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(28).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(28).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(28).drawableHourImageView),
                         listHours.get(28).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(29).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(29).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(29).drawableHourImageView),
                         listHours.get(29).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(30).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(30).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(30).drawableHourImageView),
                         listHours.get(30).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(31).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(31).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(31).drawableHourImageView),
                         listHours.get(31).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(32).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(32).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(32).drawableHourImageView),
                         listHours.get(32).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(33).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(33).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(33).drawableHourImageView),
                         listHours.get(33).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(34).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(34).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(34).drawableHourImageView),
                         listHours.get(34).texTempHour),
                 new DataClassOfHoursWithDrawable(listHours.get(35).textHour,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listHours.get(35).drawableHourImageView, "Day")),
+                        setIconWeatherURL(listHours.get(35).drawableHourImageView),
                         listHours.get(35).texTempHour)};
     }
 
     private DataClassOfDaysWithDrawable[] getDataClassOfDays() {
-        /*заполения массива погоды на 7 дней*/
         return new DataClassOfDaysWithDrawable[]{
                 new DataClassOfDaysWithDrawable(listDays.get(0).textDay,
                         listDays.get(0).texTemptDay,
                         listDays.get(0).texTemptNight,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listDays.get(0).drawableDay, "Day"))),
+                        setIconWeatherURL(listDays.get(0).drawableDay)),
                 new DataClassOfDaysWithDrawable(listDays.get(1).textDay,
                         listDays.get(1).texTemptDay,
                         listDays.get(1).texTemptNight,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listDays.get(1).drawableDay, "Day"))),
+                        setIconWeatherURL(listDays.get(1).drawableDay)),
                 new DataClassOfDaysWithDrawable(listDays.get(2).textDay,
                         listDays.get(2).texTemptDay,
                         listDays.get(2).texTemptNight,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listDays.get(2).drawableDay, "Day"))),
+                        setIconWeatherURL(listDays.get(2).drawableDay)),
                 new DataClassOfDaysWithDrawable(listDays.get(3).textDay,
                         listDays.get(3).texTemptDay,
                         listDays.get(3).texTemptNight,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listDays.get(3).drawableDay, "Day"))),
+                        setIconWeatherURL(listDays.get(3).drawableDay)),
                 new DataClassOfDaysWithDrawable(listDays.get(4).textDay,
                         listDays.get(4).texTemptDay,
                         listDays.get(4).texTemptNight,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listDays.get(4).drawableDay, "Day"))),
+                        setIconWeatherURL(listDays.get(4).drawableDay)),
                 new DataClassOfDaysWithDrawable(listDays.get(5).textDay,
                         listDays.get(5).texTemptDay,
                         listDays.get(5).texTemptNight,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listDays.get(5).drawableDay, "Day"))),
+                        setIconWeatherURL(listDays.get(5).drawableDay)),
                 new DataClassOfDaysWithDrawable(listDays.get(6).textDay,
                         listDays.get(6).texTemptDay,
                         listDays.get(6).texTemptNight,
-                        ContextCompat.getDrawable(requireActivity(), setIconWeather(listDays.get(6).drawableDay, "Day")))
+                        setIconWeatherURL(listDays.get(6).drawableDay)),
                         };
     }
 
@@ -540,181 +571,65 @@ public class WeatherFragment extends Fragment {
     }
 
     /*Метод поиска икноки погоды по информации из json*/
-    private int setIconWeather(String typeWeather1, String time) {
-        int typeWeather = 0;
-        if (time.equals("Current")) {
-            switch (typeWeather1) {
-                case "01d":
-                    typeWeather = a01d;
-                    break;
-                case "02d":
-                    typeWeather = a02d;
-                    break;
-                case "03d":
-                    typeWeather = a03d;
-                    break;
-                case "04d":
-                    typeWeather = a04d;
-                    break;
-                case "09d":
-                    typeWeather = a09d;
-                    break;
-                case "10d":
-                    typeWeather = a10d;
-                    break;
-                case "11d":
-                    typeWeather = a11d;
-                    break;
-                case "13d":
-                    typeWeather = a13d;
-                    break;
-                case "50d":
-                    typeWeather = a50d;
-                    break;
-                case "01n":
-                    typeWeather = a01n;
-                    break;
-                case "02n":
-                    typeWeather = a02n;
-                    break;
-                case "03n":
-                    typeWeather = a03n;
-                    break;
-                case "04n":
-                    typeWeather = a04n;
-                    break;
-                case "09n":
-                    typeWeather = a09n;
-                    break;
-                case "10n":
-                    typeWeather = a10n;
-                    break;
-                case "11n":
-                    typeWeather = a11n;
-                    break;
-                case "13n":
-                    typeWeather = a13n;
-                    break;
-                case "50n":
-                    typeWeather = a50n;
-                    break;
-            }
-        } else if (time.equals("Day")) {
-            switch (typeWeather1) {
-                case "01d":
-                    typeWeather = a01d;
-                    break;
-                case "02d":
-                    typeWeather = a02d;
-                    break;
-                case "03d":
-                    typeWeather = a03d;
-                    break;
-                case "04d":
-                    typeWeather = a04d;
-                    break;
-                case "09d":
-                    typeWeather = a09d;
-                    break;
-                case "10d":
-                    typeWeather = a10d;
-                    break;
-                case "11d":
-                    typeWeather = a11d;
-                    break;
-                case "13d":
-                    typeWeather = a13d;
-                    break;
-                case "50d":
-                    typeWeather = a50d;
-                    break;
-                case "01n":
-                    typeWeather = a01n;
-                    break;
-                case "02n":
-                    typeWeather = a02n;
-                    break;
-                case "03n":
-                    typeWeather = a03n;
-                    break;
-                case "04n":
-                    typeWeather = a04n;
-                    break;
-                case "09n":
-                    typeWeather = a09n;
-                    break;
-                case "10n":
-                    typeWeather = a10n;
-                    break;
-                case "11n":
-                    typeWeather = a11n;
-                    break;
-                case "13n":
-                    typeWeather = a13n;
-                    break;
-                case "50n":
-                    typeWeather = a50n;
-                    break;
-            }
-        } else {
-            switch (typeWeather1) {
-                case "01d":
-                    typeWeather = a01d;
-                    break;
-                case "02d":
-                    typeWeather = a02d;
-                    break;
-                case "03d":
-                    typeWeather = a03d;
-                    break;
-                case "04d":
-                    typeWeather = a04d;
-                    break;
-                case "09d":
-                    typeWeather = a09d;
-                    break;
-                case "10d":
-                    typeWeather = a10d;
-                    break;
-                case "11d":
-                    typeWeather = a11d;
-                    break;
-                case "13d":
-                    typeWeather = a13d;
-                    break;
-                case "50d":
-                    typeWeather = a50d;
-                    break;
-                case "01n":
-                    typeWeather = a01n;
-                    break;
-                case "02n":
-                    typeWeather = a02n;
-                    break;
-                case "03n":
-                    typeWeather = a03n;
-                    break;
-                case "04n":
-                    typeWeather = a04n;
-                    break;
-                case "09n":
-                    typeWeather = a09n;
-                    break;
-                case "10n":
-                    typeWeather = a10n;
-                    break;
-                case "11n":
-                    typeWeather = a11n;
-                    break;
-                case "13n":
-                    typeWeather = a13n;
-                    break;
-                case "50n":
-                    typeWeather = a50n;
-                    break;
-            }
+    private String setIconWeatherURL(String typeWeather) {
+        String typeWeatherURL = "";
+        switch (typeWeather) {
+            case "01d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/01d@2x.png";
+                break;
+            case "02d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/02d@2x.png";
+                break;
+            case "03d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/03d@2x.png";
+                break;
+            case "04d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/04d@2x.png";
+                break;
+            case "09d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/09d@2x.png";
+                break;
+            case "10d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/10d@2x.png";
+                break;
+            case "11d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/11d@2x.png";
+                break;
+            case "13d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/13d@2x.png";
+                break;
+            case "50d":
+                typeWeatherURL = "http://openweathermap.org/img/wn/50d@2x.png";
+                break;
+            case "01n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/01n@2x.png";
+                break;
+            case "02n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/02n@2x.png";
+                break;
+            case "03n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/03n@2x.png";
+                break;
+            case "04n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/04n@2x.png";
+                break;
+            case "09n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/09n@2x.png";
+                break;
+            case "10n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/10n@2x.png";
+                break;
+            case "11n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/11n@2x.png";
+                break;
+            case "13n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/13n@2x.png";
+                break;
+            case "50n":
+                typeWeatherURL = "http://openweathermap.org/img/wn/50n@2x.png";
+                break;
         }
-        return typeWeather;
+        return typeWeatherURL;
     }
 
     /*Метод инициализации*/
@@ -729,43 +644,6 @@ public class WeatherFragment extends Fragment {
         textWindDegree = layout.findViewById(R.id.textWindDegree);
         daysRecyclerView = layout.findViewById(R.id.daysRecyclerView);
         hoursRecyclerView = layout.findViewById(R.id.hoursRecyclerView);
-
-        a01d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a01d), "drawable", requireActivity().getPackageName());
-        a02d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a02d), "drawable", requireActivity().getPackageName());
-        a03d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a03d), "drawable", requireActivity().getPackageName());
-        a04d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a04d), "drawable", requireActivity().getPackageName());
-        a09d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a09d), "drawable", requireActivity().getPackageName());
-        a10d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a10d), "drawable", requireActivity().getPackageName());
-        a11d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a11d), "drawable", requireActivity().getPackageName());
-        a13d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a13d), "drawable", requireActivity().getPackageName());
-        a50d = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a50d), "drawable", requireActivity().getPackageName());
-        a01n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a01n), "drawable", requireActivity().getPackageName());
-        a02n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a02n), "drawable", requireActivity().getPackageName());
-        a03n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a03n), "drawable", requireActivity().getPackageName());
-        a04n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a04n), "drawable", requireActivity().getPackageName());
-        a09n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a09n), "drawable", requireActivity().getPackageName());
-        a10n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a10n), "drawable", requireActivity().getPackageName());
-        a11n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a11n), "drawable", requireActivity().getPackageName());
-        a13n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a13n), "drawable", requireActivity().getPackageName());
-        a50n = requireActivity().getResources().getIdentifier(
-                String.valueOf(R.drawable.a50n), "drawable", requireActivity().getPackageName());
 
         setClearTextView();
     }

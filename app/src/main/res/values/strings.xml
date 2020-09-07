@@ -90,5 +90,6 @@
     <string name="enter_name">Enter city</string>
     <string name="exclamation">Error!</string>
     <string name="press_button">City not found. Fail connection!</string>
+    <string name="check_weather">Server error</string>
 </resources>
 

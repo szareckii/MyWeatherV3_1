@@ -1,11 +1,26 @@
 package com.geekbrains.myweatherv3.model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Temp {
+    @SerializedName("day")
+    @Expose
     private float day;
+    @SerializedName("min")
+    @Expose
     private float min;
+    @SerializedName("max")
+    @Expose
     private float max;
+    @SerializedName("night")
+    @Expose
     private float night;
+    @SerializedName("eve")
+    @Expose
     private float eve;
+    @SerializedName("morn")
+    @Expose
     private float morn;
 
     public float getDay() {
