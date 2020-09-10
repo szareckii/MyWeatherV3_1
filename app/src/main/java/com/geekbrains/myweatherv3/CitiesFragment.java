@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,7 +49,7 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
     private void setupRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setHasFixedSize(true);
-        listData = parcel.getData();
+        listData = parcel.getDataCites();
         RecyclerDataAdapterForCity adapter = new RecyclerDataAdapterForCity(listData, this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -80,16 +79,15 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
                     parcel.setVisiblePressure(visiblePressure);
                     parcel.setCountHoursBetweenForecasts(countHoursBetweenForecasts);
                     parcel.setDarkTheme(darkTheme);
-                    parcel.setData(listData);
+                    parcel.setDataCites(listData);
                     parcel.setLon(lon);
                     parcel.setLat(lat);
 
-                    //Заменяем на фрагмент с погодой
-                    Fragment newFragment = new WeatherFragment();
-                    FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                    transaction.replace(R.id.container, newFragment);
-                    transaction.commit();
-
+//                    //Заменяем на фрагмент с погодой
+                    if (getActivity() != null) {
+                        MainActivity ma = (MainActivity) getActivity();
+                        ma.setWeatherFragment();
+                    }
                 }).show();
     }
 

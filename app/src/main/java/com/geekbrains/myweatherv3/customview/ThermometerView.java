@@ -1,4 +1,4 @@
-package com.geekbrains.myweatherv3.customView;
+package com.geekbrains.myweatherv3.customview;
 
 
 import android.annotation.SuppressLint;

@@ -8,14 +8,56 @@ import java.util.Stack;
 
 public class Parcel implements Serializable {
     private String cityName;
+    private String tempCurrent;
+    private String windNow;
+    private String pressureNow;
+    private int windDegree;
+    private String typesWeather;
+    private DataClassOfHours[] dataHours;
+    private DataClassOfDays[] dataDays;
     private boolean visibleWind;
     private boolean visiblePressure;
     private int countHoursBetweenForecasts;
     private boolean darkTheme;
-    private ArrayList<String> data;
+    private ArrayList<String> dataCites;
     private float lon;
     private float lat;
     private String currentFragmentName;
+    private int requestFlag = 0;
+    private int requestWeatherFlag = 0;
+
+
+    public DataClassOfHours[] getDataHours() {
+        return dataHours;
+    }
+
+    public void setDataHours(DataClassOfHours[] dataHours) {
+        this.dataHours = dataHours;
+    }
+
+    public DataClassOfDays[] getDataDays() {
+        return dataDays;
+    }
+
+    public void setDataDays(DataClassOfDays[] dataDays) {
+        this.dataDays = dataDays;
+    }
+
+    public int getRequestWeatherFlag() {
+        return requestWeatherFlag;
+    }
+
+    public void setRequestWeatherFlag(int requestWeatherFlag) {
+        this.requestWeatherFlag = requestWeatherFlag;
+    }
+
+    public int getRequestFlag() {
+        return requestFlag;
+    }
+
+    public void setRequestFlag(int requestFlag) {
+        this.requestFlag = requestFlag;
+    }
 
     private Stack<Fragment> fragmentStack;
 
@@ -31,8 +73,8 @@ public class Parcel implements Serializable {
         this.cityName = cityName;
     }
 
-    public void setData(ArrayList<String> data) {
-        this.data = data;
+    public void setDataCites(ArrayList<String> dataCites) {
+        this.dataCites = dataCites;
     }
 
     public String getCityName() {
@@ -55,8 +97,8 @@ public class Parcel implements Serializable {
         return countHoursBetweenForecasts;
     }
 
-    public ArrayList<String> getData() {
-        return data;
+    public ArrayList<String> getDataCites() {
+        return dataCites;
     }
 
     public void setVisibleWind(boolean visibleWind) {
@@ -99,7 +141,7 @@ public class Parcel implements Serializable {
         this.visiblePressure = visiblePressure;
         this.countHoursBetweenForecasts = countHoursBetweenForecasts;
         this.darkTheme = darkTheme;
-        this.data = data;
+        this.dataCites = data;
         this.lon = lon;
         this.lat = lat;
         this.currentFragmentName = currentFragmentName;
@@ -112,5 +154,45 @@ public class Parcel implements Serializable {
 
     public void setFragmentStack(Stack<Fragment> fragmentStack) {
         this.fragmentStack = fragmentStack;
+    }
+
+    public String getTempCurrent() {
+        return tempCurrent;
+    }
+
+    public void setTempCurrent(String tempCurrent) {
+        this.tempCurrent = tempCurrent;
+    }
+
+    public String getWindNow() {
+        return windNow;
+    }
+
+    public void setWindNow(String windNow) {
+        this.windNow = windNow;
+    }
+
+    public String getPressureNow() {
+        return pressureNow;
+    }
+
+    public void setPressureNow(String pressureNow) {
+        this.pressureNow = pressureNow;
+    }
+
+    public int getWindDegree() {
+        return windDegree;
+    }
+
+    public void setWindDegree(int windDegree) {
+        this.windDegree = windDegree;
+    }
+
+    public String getTypesWeather() {
+        return typesWeather;
+    }
+
+    public void setTypesWeather(String typesWeather) {
+        this.typesWeather = typesWeather;
     }
 }
