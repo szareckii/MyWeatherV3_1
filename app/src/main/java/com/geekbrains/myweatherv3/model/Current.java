@@ -1,19 +1,50 @@
 package com.geekbrains.myweatherv3.model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Current {
+    @SerializedName("dt")
+    @Expose
     private int dt;
+    @SerializedName("sunrise")
+    @Expose
     private int sunrise;
+    @SerializedName("sunset")
+    @Expose
     private int sunset;
+    @SerializedName("temp")
+    @Expose
     private float temp;
+    @SerializedName("feels_like")
+    @Expose
     private float feels_like;
+    @SerializedName("pressure")
+    @Expose
     private int pressure;
+    @SerializedName("humidity")
+    @Expose
     private int humidity;
+    @SerializedName("dew_point")
+    @Expose
     private float dew_point;
+    @SerializedName("uvi")
+    @Expose
     private float uvi;
+    @SerializedName("clouds")
+    @Expose
     private int clouds;
+    @SerializedName("visibility")
+    @Expose
     private int visibility;
+    @SerializedName("wind_speed")
+    @Expose
     private float wind_speed;
+    @SerializedName("wind_deg")
+    @Expose
     private int wind_deg;
+    @SerializedName("weather")
+    @Expose
     private Weather[] weather;
 
     public int getDt() {

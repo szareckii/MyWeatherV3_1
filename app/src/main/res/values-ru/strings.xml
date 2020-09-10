@@ -90,4 +90,5 @@
     <string name="enter_name">Введите город</string>
     <string name="exclamation">Ошибка!</string>
     <string name="press_button">Город не найден. Ошибка подключения!</string>
+    <string name="check_weather">Ошибка сервера</string>
 </resources>

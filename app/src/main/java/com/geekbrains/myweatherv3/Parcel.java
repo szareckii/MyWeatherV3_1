@@ -25,7 +25,7 @@ public class Parcel implements Serializable {
     private String currentFragmentName;
     private int requestFlag = 0;
     private int requestWeatherFlag = 0;
-
+    private Stack<Fragment> fragmentStack;
 
     public DataClassOfHours[] getDataHours() {
         return dataHours;
@@ -59,7 +59,6 @@ public class Parcel implements Serializable {
         this.requestFlag = requestFlag;
     }
 
-    private Stack<Fragment> fragmentStack;
 
     public String getCurrentFragmentName() {
         return currentFragmentName;

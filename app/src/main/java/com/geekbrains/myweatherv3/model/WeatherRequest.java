@@ -1,12 +1,29 @@
 package com.geekbrains.myweatherv3.model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class WeatherRequest {
+    @SerializedName("lat")
+    @Expose
     private float lat;
+    @SerializedName("lon")
+    @Expose
     private float lon;
+    @SerializedName("timezone")
+    @Expose
     private String timezone;
+    @SerializedName("timezone_offset")
+    @Expose
     private String timezone_offset;
+    @SerializedName("current")
+    @Expose
     private Current current;
+    @SerializedName("hourly")
+    @Expose
     private Hourly[] hourly;
+    @SerializedName("daily")
+    @Expose
     private Daily[] daily;
 
     public float getLat() {

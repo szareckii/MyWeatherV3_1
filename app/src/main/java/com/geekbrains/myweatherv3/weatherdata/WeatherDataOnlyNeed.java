@@ -10,6 +10,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import retrofit2.Response;
+
 public class WeatherDataOnlyNeed {
     private Parcel parcel;
     private static final String TAG = "myLogs";
@@ -25,29 +27,30 @@ public class WeatherDataOnlyNeed {
             cPlusThirtyFiveHours, cPlusThirtySixHours;
     private DateFormat df, dfHour;
 
-    public WeatherDataOnlyNeed(Parcel parcel, WeatherRequest weatherRequest) {
+    public WeatherDataOnlyNeed(Parcel parcel, Response<WeatherRequest> response) {
         this.parcel = parcel;
-        displayWeather(weatherRequest);
+        displayWeather(response);
     }
 
     /*Метод записи погоды в View"*/
-    private void displayWeather(WeatherRequest weatherRequest) {
-        int ft = Math.round(weatherRequest.getCurrent().getTemp());
+    private void displayWeather(Response<WeatherRequest> response) {
+        assert response.body() != null;
+        int ft = Math.round(response.body().getCurrent().getTemp());
         parcel.setTempCurrent(getStringTemp(ft));
-        String wind = String.valueOf(weatherRequest.getCurrent().getWind_speed());
+        String wind = String.valueOf(response.body().getCurrent().getWind_speed());
         parcel.setWindNow(wind);
-        String pressure = String.valueOf((int) Math.round(weatherRequest.getCurrent().getPressure() / 1.333));
+        String pressure = String.valueOf((int) Math.round(response.body().getCurrent().getPressure() / 1.333));
         parcel.setPressureNow(pressure);
-        int degree = weatherRequest.getCurrent().getWind_deg();
+        int degree = response.body().getCurrent().getWind_deg();
         parcel.setWindDegree(degree);
-        parcel.setTypesWeather(weatherRequest.getCurrent().getWeather()[0].getIcon());
+        parcel.setTypesWeather(response.body().getCurrent().getWeather()[0].getIcon());
 
         findCurrentHour();
 
-        DataClassOfHours[] dataHours = getDataClassOfHours(weatherRequest);
+        DataClassOfHours[] dataHours = getDataClassOfHours(response.body());
         parcel.setDataHours(dataHours);
 
-        DataClassOfDays[] dataDays = getDataClassOfDays(weatherRequest);
+        DataClassOfDays[] dataDays = getDataClassOfDays(response.body());
         parcel.setDataDays(dataDays);
         Log.e(TAG, "WeatherDataOnlyNeed-displayWeather");
 

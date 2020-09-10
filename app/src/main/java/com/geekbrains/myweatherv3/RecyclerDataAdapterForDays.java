@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 public class RecyclerDataAdapterForDays extends RecyclerView.Adapter<RecyclerDataAdapterForDays.ViewHolder> {
@@ -34,10 +34,11 @@ public class RecyclerDataAdapterForDays extends RecyclerView.Adapter<RecyclerDat
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         holder.textDay.setText(data.get(position).textDay);
-//        holder.textDay.setTextColor(Color.parseColor("#DC1919"));
         holder.texTemptDay.setText(data.get(position).texTemptDay);
         holder.texTemptNight.setText(data.get(position).texTemptNight);
-        holder.drawableDayImageView.setImageDrawable(data.get(position).drawableDay);
+        Picasso.get()
+                .load(data.get(position).drawableDay)
+                .into(holder.drawableDayImageView);
     }
 
     @Override

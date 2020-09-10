@@ -1,9 +1,20 @@
 package com.geekbrains.myweatherv3.model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Feels_like {
+    @SerializedName("day")
+    @Expose
     private float day;
+    @SerializedName("night")
+    @Expose
     private float night;
+    @SerializedName("eve")
+    @Expose
     private float eve;
+    @SerializedName("morn")
+    @Expose
     private float morn;
 
     public float getDay() {

@@ -6,9 +6,9 @@ public class DataClassOfDaysWithDrawable {
     String textDay;
     String texTemptDay;
     String texTemptNight;
-    Drawable drawableDay;
+    String drawableDay;
 
-    public DataClassOfDaysWithDrawable(String textDay, String texTemptDay, String texTemptNight, Drawable drawableDay) {
+    public DataClassOfDaysWithDrawable(String textDay, String texTemptDay, String texTemptNight, String drawableDay) {
         this.textDay = textDay;
         this.texTemptDay = texTemptDay;
         this.texTemptNight = texTemptNight;
