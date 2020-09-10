@@ -1,6 +1,7 @@
 package com.geekbrains.myweatherv3;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,16 +13,20 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.geekbrains.myweatherv3.bd.App;
+import com.geekbrains.myweatherv3.bd.CityWithHistory;
+import com.geekbrains.myweatherv3.bd.RecyclerHistoryAdapter;
 import com.geekbrains.myweatherv3.model.SearchRequest;
 import com.geekbrains.myweatherv3.weatherdata.CityDataOnlyNeed;
+import com.geekbrains.myweatherv3.weatherdata.RetrofitAdapter;
 import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 // Фрагмент выбора города из списка
 public class CitiesFragment extends Fragment  implements IRVOnItemClick {
@@ -31,6 +36,7 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
     private ArrayList<String> listData;
     private Parcel parcel;
     private OpenWeather openWeather;
+    private List<CityWithHistory> cities;
 
     // При создании фрагмента укажем его макет
     @Override
@@ -43,11 +49,25 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
         parcel = MainActivity.getParcel();
         parcel.setCurrentFragmentName(Objects.requireNonNull(requireActivity().getSupportFragmentManager().findFragmentById(R.id.container)).getTag());
 
-        setupRecyclerView();
+        setHistoryByDate();
         Log.d(TAG, "CitiesFragment. onCreateView()");
-        initRetorfit();
+
+        RetrofitAdapter retrofitAdapter = new RetrofitAdapter();
+        openWeather = retrofitAdapter.getOpenWeather();
 
         return rootView;
+    }
+
+    //Получаем список истории в потоке
+    private void setHistoryByDate() {
+        Handler handler = new Handler();
+        new Thread(() -> {
+            List<CityWithHistory> histories = App.getInstance().getWeatherDao().getCityWithHistory();
+            handler.post(() -> {
+                cities = histories;
+                setupRecyclerView();
+            });
+        }).start();
     }
 
     // Инициализация полей
@@ -55,15 +75,17 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
         recyclerView = rootView.findViewById(R.id.recyclerView);
     }
 
+    //Заполняем recyclerView
     private void setupRecyclerView() {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         listData = parcel.getDataCites();
-        RecyclerDataAdapterForCity adapter = new RecyclerDataAdapterForCity(listData, this);
         recyclerView.setLayoutManager(layoutManager);
+        RecyclerHistoryAdapter adapter = new RecyclerHistoryAdapter(cities, this);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(),
                 DividerItemDecoration.VERTICAL));
+        Log.d(TAG, "CityRecyclerAdapter()!!!!!!");
     }
 
     @Override
@@ -73,7 +95,7 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
 
     //Метод обработки нажатия по городу из списка
     @Override
-    public void onItemClicked(String itemText) {
+    public void onItemClicked(String itemText, final float lon, final float lat) {
         Snackbar.make(requireView(), getString(R.string.choose_city_snackbar) + " " + itemText + "?",  Snackbar.LENGTH_LONG)
                 .setAction(R.string.ok_button, v -> {
                     Log.d(TAG, "RecyclerDataAdapter. setOnClickForItem() - " + itemText);
@@ -88,6 +110,8 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
                     parcel.setCountHoursBetweenForecasts(countHoursBetweenForecasts);
                     parcel.setDarkTheme(darkTheme);
                     parcel.setDataCites(listData);
+                    parcel.setLon(lon);
+                    parcel.setLat(lat);
 
                     requestRetrofit(itemText);
 
@@ -105,17 +129,6 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
         //+ Также меняем текущую позицию на Parcel
         outState.putSerializable("CurrentCity", parcel);
         super.onSaveInstanceState(outState);
-    }
-
-    private void initRetorfit() {
-        Retrofit retrofit;
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.openweathermap.org/") // Базовая часть адреса
-                // Конвертер, необходимый для преобразования JSON в объекты
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        // Создаём объект, при помощи которого будем выполнять запросы
-        openWeather = retrofit.create(OpenWeather.class);
     }
 
     private void requestRetrofit(String city) {

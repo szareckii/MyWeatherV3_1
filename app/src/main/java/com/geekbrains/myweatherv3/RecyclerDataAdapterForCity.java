@@ -12,7 +12,6 @@ import java.util.ArrayList;
 public class RecyclerDataAdapterForCity extends RecyclerView.Adapter<RecyclerDataAdapterForCity.ViewHolder> {
     private ArrayList<String> data;
     private IRVOnItemClick onItemClickCallback;
-
     private int selectedPos = 0;
 
     public RecyclerDataAdapterForCity(ArrayList<String> data, IRVOnItemClick onItemClickCallback) {
@@ -51,7 +50,7 @@ public class RecyclerDataAdapterForCity extends RecyclerView.Adapter<RecyclerDat
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            textView = itemView.findViewById(R.id.itemTextView);
+            textView = itemView.findViewById(R.id.itemCityNameTextView);
         }
 
         void setTextToTextView(String text) {
@@ -66,7 +65,7 @@ public class RecyclerDataAdapterForCity extends RecyclerView.Adapter<RecyclerDat
                     notifyItemChanged(selectedPos);
                     selectedPos = getAdapterPosition();
                     notifyItemChanged(selectedPos);
-                    onItemClickCallback.onItemClicked(text);
+//                    onItemClickCallback.onItemClicked(text);
                 }
             });
         }
