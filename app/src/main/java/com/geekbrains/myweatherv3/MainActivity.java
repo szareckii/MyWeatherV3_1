@@ -2,6 +2,7 @@ package com.geekbrains.myweatherv3;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -10,20 +11,49 @@ import androidx.fragment.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+import com.geekbrains.myweatherv3.model.SearchRequest;
 import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Stack;
+import java.util.regex.Pattern;
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private static final String TAG = "myLogs";
     private DrawerLayout drawer;
     private WeatherFragment weatherFragment;
+    private CitiesFragment citiesFragment;
     private SettingsFragment settingsFragment;
+    private DeveloperFragment developerFragment;
+    private FeedbackFragment feedbackFragment;
     private static Parcel parcel;
+    private ArrayList<String> listData;
+    private Pattern checkCityName = Pattern.compile("^[а-яА-ЯёЁa-zA-Z0-9]+$");
+    private static final String WEATHER_URL_FOR_SEARCH = "https://api.openweathermap.org/data/2.5/weather?lang=ru&q=";
+    private static final String WEATHER_SET_API_KEY_FOR_SEARCH = "&appid=";
+    private final String TAG_WEATHER = "class com.geekbrains.myweatherv3.WeatherFragment";
+    private final String TAG_CITIES = "class com.geekbrains.myweatherv3.CitiesFragment";
+    private final String TAG_SETTINGS = "class com.geekbrains.myweatherv3.SettingsFragment";
+    private final String TAG_DEVELOPER = "class com.geekbrains.myweatherv3.DeveloperFragment";
+    private final String TAG_FEEDBACK = "class com.geekbrains.myweatherv3.FeedbackFragment";
+    private String cityName;
+    private Stack<Fragment> fragmentStack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,46 +84,47 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         weatherFragment = new WeatherFragment();
-        CitiesFragment citiesFragment = new CitiesFragment();
+        citiesFragment = new CitiesFragment();
         settingsFragment = new SettingsFragment();
-        DeveloperFragment developerFragment = new DeveloperFragment();
-        FeedbackFragment feedbackFragment = new FeedbackFragment();
-
+        developerFragment = new DeveloperFragment();
+        feedbackFragment = new FeedbackFragment();
 
         if (parcel == null) {
             String[] cities = getResources().getStringArray(R.array.cities);
-            ArrayList<String> listData = new ArrayList<>(Arrays.asList(cities));
+            listData = new ArrayList<>(Arrays.asList(cities));
+
+            /*Создаем стэк вызовов фрагментов для дальнейшего испольхования в подсветке бокового меню*/
+            fragmentStack = new Stack<>();
             parcel = new Parcel("Москва", true, true,
-                    1, false, listData, 0, 0,
-                    "class com.geekbrains.myweatherv3.WeatherFragment");
+                    1, false, listData, 0, 0, TAG_WEATHER, fragmentStack);
+        } else {
+            fragmentStack = parcel.getFragmentStack();
         }
+
+        navigationView.setCheckedItem(R.id.nav_weather);
 
         if (parcel.getCurrentFragmentName() != null) {
             String tag = parcel.getCurrentFragmentName();
             if(weatherFragment.getClass().toString().equals(tag)){
                 setWeatherFragment();
-                parcel.setCurrentFragmentName("class com.geekbrains.myweatherv3.WeatherFragment");
             } else if(citiesFragment.getClass().toString().equals(tag)){
                 setCitiesFragment();
-                parcel.setCurrentFragmentName("class com.geekbrains.myweatherv3.CitiesFragment");
             } else if(settingsFragment.getClass().toString().equals(tag)){
                 setSettingsFragment();
-                parcel.setCurrentFragmentName("class com.geekbrains.myweatherv3.SettingsFragment");
             } else if(developerFragment.getClass().toString().equals(tag)){
                 setDeveloperFragment();
-                parcel.setCurrentFragmentName("class com.geekbrains.myweatherv3.DeveloperFragment");
             } else if(feedbackFragment.getClass().toString().equals(tag)){
                 setFeedbackFragment();
-                parcel.setCurrentFragmentName("class com.geekbrains.myweatherv3.FeedbackFragment");
             }
         } else {
             setWeatherFragment();
         }
 
         setOnClickForSideMenuItems();
+//        setChooseCityBtnEnterClickBehavior();
     }
 
-
+    /*Метод смены темы светлая-темная*/
     public void ToggleTheme(boolean isChecked){
         if (isChecked) {
             this.getTheme().applyStyle(R.style.AppDarkTheme, true);
@@ -105,14 +136,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     public static Parcel getParcel() {
         return parcel;
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -120,7 +149,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
-            navigationView.setCheckedItem(R.id.nav_weather);
+            fragmentStack.pop();
+            switch (Objects.requireNonNull(fragmentStack.peek().getTag())) {
+                case TAG_WEATHER : {
+                    navigationView.setCheckedItem(R.id.nav_weather);
+                    break;
+                }
+                case TAG_CITIES : {
+                    navigationView.setCheckedItem(R.id.nav_cities);
+                    break;
+                }
+                case TAG_SETTINGS : {
+                    navigationView.setCheckedItem(R.id.nav_settings);
+                    break;
+                }
+                case TAG_DEVELOPER : {
+                    navigationView.setCheckedItem(R.id.nav_developer);
+                    break;
+                }
+                case TAG_FEEDBACK : {
+                    navigationView.setCheckedItem(R.id.nav_feedback);
+                    break;
+                }
+            }
+
+        } else if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
+            finish();
         }
         super.onBackPressed();
     }
@@ -142,15 +196,41 @@ public class MainActivity extends AppCompatActivity {
     /*Метод нажатия кнопок в баре*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        /*если нажата кнопка "разработчкики"*/
-        if (item.getItemId() == R.id.action_yandex) {
+        /*если нажата кнопка "добавить город"*/
+        if (item.getItemId() == R.id.action_add_city) {
+            // Создаем билдер и передаем контекст приложения
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            // Вытащим макет диалога
+            final View contentView = getLayoutInflater().inflate(R.layout.add_city_dialog, null);
+            // в билдере указываем заголовок окна (можно указывать как ресурс, так и строку)
+            builder.setTitle(R.string.enter_name)
+                    // Установим макет диалога (можно устанавливать любой view)
+                    .setView(contentView)
+                    .setPositiveButton(R.string.done, (dialogInterface, i) -> {
+                        EditText editText = contentView.findViewById(R.id.addCityInput);
+                        cityName = editText.getText().toString();
+                        String msgError = getString(R.string.check_cityname);
+
+                        if (checkCityName.matcher(cityName).matches()) {    // Проверим на основе регулярных выражений
+                            //Есть город есть - узнаем координаты. Если нет - предупреждение
+                            findCityOnOpenweathermap(cityName);
+                        } else {
+                            Toast.makeText(MainActivity.this, msgError, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        /*если нажата кнопка "погода яндекса"*/
+        } else if (item.getItemId() == R.id.action_yandex) {
             Uri uri = Uri.parse(findYandexWeatherHttp(parcel.getCityName()));
             Intent browser = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(browser);
+        /*если нажата кнопка "Климат города"*/
         } else if (item.getItemId() == R.id.action_city_climate) {
             Uri uri = Uri.parse(findWikiWeatherHttp(parcel.getCityName()));
             Intent browser = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(browser);
+        /*если нажата кнопка "выход"*/
         } else if (item.getItemId() == R.id.action_exit) {
             finish();
         }
@@ -219,6 +299,7 @@ public class MainActivity extends AppCompatActivity {
         return wikiWeatherHttp;
     }
 
+    /*Метод обработки нажатия по боковому меню*/
     private void setOnClickForSideMenuItems() {
         navigationView.setNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
@@ -253,23 +334,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setWeatherFragment() {
-        setFragment(weatherFragment, "class com.geekbrains.myweatherv3.WeatherFragment");
+        Log.e(TAG, "setWeatherFragment");
+        weatherFragment = new WeatherFragment();
+        setFragment(weatherFragment, TAG_WEATHER);
+        fragmentStack.push(weatherFragment);
+        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setCitiesFragment() {
-        setFragment(new CitiesFragment(), "class com.geekbrains.myweatherv3.CitiesFragment");
+        Log.e(TAG, "setCitiesFragment");
+        citiesFragment = new CitiesFragment();
+        setFragment(citiesFragment, TAG_CITIES);
+        fragmentStack.push(citiesFragment);
+        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setSettingsFragment() {
-        setFragment(settingsFragment, "class com.geekbrains.myweatherv3.SettingsFragment");
+        Log.e(TAG, "setSettingsFragment");
+        settingsFragment = new SettingsFragment();
+        setFragment(settingsFragment, TAG_SETTINGS);
+        fragmentStack.push(settingsFragment);
+        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setDeveloperFragment() {
-        setFragment(new DeveloperFragment(), "class com.geekbrains.myweatherv3.DeveloperFragment");
+        Log.e(TAG, "setDeveloperFragment");
+        developerFragment = new DeveloperFragment();
+        setFragment(developerFragment, TAG_DEVELOPER);
+        fragmentStack.push(developerFragment);
+        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setFeedbackFragment() {
-        setFragment(new FeedbackFragment(), "class com.geekbrains.myweatherv3.FeedbackFragment");
+        Log.e(TAG, "setFeedbackFragment");
+        feedbackFragment = new FeedbackFragment();
+        setFragment(feedbackFragment, TAG_FEEDBACK);
+        fragmentStack.push(feedbackFragment);
+        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setFragment(Fragment fragment, String tag) {
@@ -279,6 +380,112 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    /*Поиск города на сайте погоды*/
+    public void findCityOnOpenweathermap(String cityName) {
+//        parcel = MainActivity.getParcel();
+        try {
+            final URL uri = new URL(WEATHER_URL_FOR_SEARCH + cityName +
+                    WEATHER_SET_API_KEY_FOR_SEARCH + BuildConfig.WEATHER_API_KEY);
+            Log.e(TAG, "URI: " + uri);
+            final Handler handler = new Handler(); // Запоминаем основной поток
+            new Thread(() -> {
+                HttpsURLConnection urlConnection = null;
+                try {
+
+                    /*Настройки дла соединения с ПРОКСИ*/
+//                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("10.10.10.10", 123));
+//                    urlConnection = (HttpsURLConnection) uri.openConnection(proxy);
+                    urlConnection = (HttpsURLConnection) uri.openConnection();
+
+                    urlConnection.setRequestMethod("GET"); // установка метода получения данных -GET
+                    urlConnection.setReadTimeout(10000); // установка таймаута - 10 000 миллисекунд
+                    Log.e(TAG, "Connect: true");
+                    BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream())); // читаем  данные в поток
+                    String result = getLines(in);
+                    // преобразование данных запроса в модель
+                    Log.e(TAG, "getLines() result: true");
+                    Gson gson = new Gson();
+                    final SearchRequest searchRequest = gson.fromJson(result, SearchRequest.class);
+                    // Возвращаемся к основному потоку
+                    handler.post(() -> searchCity(searchRequest));
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Fail connection", e);
+                    handler.post(this::alertError);
+
+                    e.printStackTrace();
+                } finally {
+                    if (null != urlConnection) {
+                        urlConnection.disconnect();
+                    }
+                }
+            }).start();
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "Fail URI", e);
+            e.printStackTrace();
+        }
+    }
+
+    private void alertError() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        // в билдере указываем заголовок окна (можно указывать как ресурс, так и строку)
+        builder.setTitle(R.string.exclamation)
+                // указываем сообщение в окне (также есть вариант со строковым параметром)
+                .setMessage(R.string.press_button)
+                // можно указать и пиктограмму
+                .setIcon(R.mipmap.ic_launcher_round)
+                // устанавливаем кнопку (название кнопки также можно задавать строкой)
+                .setPositiveButton(R.string.ok_button,
+                        // Ставим слушатель, нажатие будем обрабатывать
+                        (dialog, id) -> {
+                        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+
+    private String getLines(BufferedReader in) {
+
+        StringBuilder rawData = new StringBuilder(1024);
+        String tempVariable;
+
+        while (true) {
+            try {
+                tempVariable = in.readLine();
+                if (tempVariable == null) break;
+                rawData.append(tempVariable).append("\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return rawData.toString();
+    }
+
+    /*Метод получения координат нового города*/
+    private void searchCity(SearchRequest searchRequest) {
+        float lon = searchRequest.getCoord().getLon();
+        float lat = searchRequest.getCoord().getLat();
+        Log.e(TAG, "CityCoordinates. Coord: lon - " + lon + " lat: " + lat);
+        Log.e(TAG, "requestFlag: 1");
+
+        listData = parcel.getData();
+        listData.add(searchRequest.getName());
+        parcel.setData(listData);
+
+        parcel.setCityName(searchRequest.getName());
+        parcel.setLat(lat);
+        parcel.setLon(lon);
+
+        navigationView.setCheckedItem(R.id.nav_weather);
+        setWeatherFragment();
+    }
 }
 
 

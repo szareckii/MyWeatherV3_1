@@ -9,8 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.TextView;
@@ -20,9 +23,7 @@ import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -72,6 +73,8 @@ public class WeatherFragment extends Fragment {
         setRetainInstance(true);
         findViews(layout);
 
+
+        Log.e(TAG, "setWeatherFragment - onCreateView");
         Parcel parcel = MainActivity.getParcel();
         parcel.setCurrentFragmentName(Objects.requireNonNull(requireActivity().getSupportFragmentManager().findFragmentById(R.id.container)).getTag());
 
@@ -96,12 +99,24 @@ public class WeatherFragment extends Fragment {
         setVisiblePressure(pressureVisible);
         setVisibleWindy(windyVisible);
 
-
         return layout;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Log.e(TAG, "setWeatherFragment! onViewCreated!");
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.e(TAG, "setWeatherFragment! onActivityCreated!");
+    }
+
     /*Метод получения локкации города по ему имени (на openweathermap погода за 7 дней ищется только
-             по координатам)*/
+                         по координатам)*/
     private void getGeoFromCityName(float lon, float lat) {
         if (lat != 0.0f) {
             WEATHER_URL_CITY = "&lat=" + lat + "&lon=" + lon;
@@ -151,11 +166,15 @@ public class WeatherFragment extends Fragment {
             CustomGridLayoutManager layoutManager = new CustomGridLayoutManager(getActivity());
             layoutManager.setScrollEnabled(false);
             daysRecyclerView.setLayoutManager(layoutManager);
+            daysRecyclerView.addItemDecoration(new DividerItemDecoration(daysRecyclerView.getContext(),
+                    DividerItemDecoration.VERTICAL));
 
         } else {
             LinearLayoutManager layoutManager;
             layoutManager = new LinearLayoutManager(getActivity());
             daysRecyclerView.setLayoutManager(layoutManager);
+            daysRecyclerView.addItemDecoration(new DividerItemDecoration(daysRecyclerView.getContext(),
+                    DividerItemDecoration.VERTICAL));
         }
 
         daysRecyclerView.setHasFixedSize(true);
@@ -367,9 +386,9 @@ public class WeatherFragment extends Fragment {
                 try {
 
                     /*Настройки дла соединения с ПРОКСИ*/
-                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("10.10.112.2", 3128));
-                    urlConnection = (HttpsURLConnection) uri.openConnection(proxy);
-//                    urlConnection = (HttpsURLConnection) uri.openConnection();
+//                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("10.10.10.10", 123));
+//                    urlConnection = (HttpsURLConnection) uri.openConnection(proxy);
+                    urlConnection = (HttpsURLConnection) uri.openConnection();
 
 
                     urlConnection.setRequestMethod("GET"); // установка метода получения данных -GET
@@ -447,13 +466,28 @@ public class WeatherFragment extends Fragment {
         textUnitWind.setText(R.string.textUnitWind);
         textUnitPressureNow.setText(R.string.textUnitPressureNow);
 
-
-
-        /*Температура на 12 часов*/
+        /*Температура на 48 часов*/
         listHours = new ArrayList<>(48);
+        DataClassOfHours[] dataHours = getDataClassOfHours(weatherRequest);
 
-        /*почасова погода на 36, т.к. 12 почасовых прогнозо с возможностью выбора между прогнозами
-        1, 2 или 3 часа, т.е. 12*3*/
+        listHours.clear();
+        for (int i = 0; i < 12; i++) {
+            listHours.add(dataHours[i * hoursBetweenForecasts]);
+        }
+
+        setupRecyclerViewHours(listHours);
+
+        /*Температура на 7 дней*/
+        listDays = new ArrayList<>(7);
+        DataClassOfDays[] dataDays = getDataClassOfDays(weatherRequest);
+        listDays.clear();
+        listDays.addAll(Arrays.asList(dataDays));
+        setupRecyclerViewDays(listDays);
+    }
+
+    private DataClassOfHours[] getDataClassOfHours(WeatherRequest weatherRequest) {
+    /*почасова погода на 36, т.к. 12 почасовых прогнозо с возможностью выбора между прогнозами
+    1, 2 или 3 часа, т.е. 12*3*/
         int temp1_hour = Math.round(weatherRequest.getHourly()[1].getTemp());
         int temp2_hour = Math.round(weatherRequest.getHourly()[2].getTemp());
         int temp3_hour = Math.round(weatherRequest.getHourly()[3].getTemp());
@@ -491,7 +525,7 @@ public class WeatherFragment extends Fragment {
         int temp35_hour = Math.round(weatherRequest.getHourly()[35].getTemp());
         int temp36_hour = Math.round(weatherRequest.getHourly()[36].getTemp());
 
-        DataClassOfHours[] dataHours = new DataClassOfHours[]{
+        return new DataClassOfHours[]{
                 new DataClassOfHours(dfHour.format(cPlusOneHour.getTime()),
                         ContextCompat.getDrawable(requireActivity(), setIconWeather(weatherRequest,
                                 "Hour", 1)),
@@ -636,17 +670,9 @@ public class WeatherFragment extends Fragment {
                         ContextCompat.getDrawable(requireActivity(), setIconWeather(weatherRequest,
                                 "Hour", 36)),
                         getStringTemp(temp36_hour))};
+    }
 
-        listHours.clear();
-        for (int i = 0; i < 12; i++) {
-            listHours.add(dataHours[i * hoursBetweenForecasts]);
-        }
-
-        setupRecyclerViewHours(listHours);
-
-        /*Температура на 7 дней*/
-        listDays = new ArrayList<>(7);
-
+    private DataClassOfDays[] getDataClassOfDays(WeatherRequest weatherRequest) {
         int temp1_day =  Math.round(weatherRequest.getDaily()[0].getTemp().getDay());
         int temp1_night =  Math.round(weatherRequest.getDaily()[0].getTemp().getNight());
         int temp2_day =  Math.round(weatherRequest.getDaily()[1].getTemp().getDay());
@@ -662,10 +688,8 @@ public class WeatherFragment extends Fragment {
         int temp7_day =  Math.round(weatherRequest.getDaily()[6].getTemp().getDay());
         int temp7_night =  Math.round(weatherRequest.getDaily()[6].getTemp().getNight());
 
-//        Drawable r = ContextCompat.getDrawable(getActivity(), a01d);
-
         /*заполения массива погоды на 7 дней*/
-        DataClassOfDays[] dataDays = new DataClassOfDays[]{
+        return new DataClassOfDays[]{
                 new DataClassOfDays(df.format(cDayPlusOne.getTime()), getStringTemp(temp1_day),
                         ContextCompat.getDrawable(requireActivity(), setIconWeather(weatherRequest, "Day", 1)),
                         getStringTemp(temp1_night)),
@@ -687,11 +711,6 @@ public class WeatherFragment extends Fragment {
                 new DataClassOfDays(df.format(cDayPlusSeven.getTime()), getStringTemp(temp7_day),
                         ContextCompat.getDrawable(requireActivity(), setIconWeather(weatherRequest, "Day", 7)),
                         getStringTemp(temp7_night))};
-
-
-        listDays.clear();
-        listDays.addAll(Arrays.asList(dataDays));
-        setupRecyclerViewDays(listDays);
     }
 
     /* Метод вперевода направления ветра из градусов в стороны света*/
@@ -916,10 +935,8 @@ public class WeatherFragment extends Fragment {
         imageTypsWeather = layout.findViewById(R.id.imageTypsWeather);
         textWindNow = layout.findViewById(R.id.textWindNow);
         textPressureNow = layout.findViewById(R.id.textPressureNow);
-//        imgBtnSettings = layout.findViewById(R.id.imgBtnSettings);
         textUnitWind = layout.findViewById(R.id.textUnitWind);
         textUnitPressureNow = layout.findViewById(R.id.textUnitPressureNow);
-//        imgBtnWeatherToYandex = layout.findViewById(R.id.imageBtnWeatherFromYandex);
         textWindDegree = layout.findViewById(R.id.textWindDegree);
         daysRecyclerView = layout.findViewById(R.id.daysRecyclerView);
         hoursRecyclerView = layout.findViewById(R.id.hoursRecyclerView);

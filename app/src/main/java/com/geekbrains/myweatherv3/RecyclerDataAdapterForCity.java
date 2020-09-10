@@ -1,7 +1,5 @@
 package com.geekbrains.myweatherv3;
 
-import android.content.res.Configuration;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,14 +31,6 @@ public class RecyclerDataAdapterForCity extends RecyclerView.Adapter<RecyclerDat
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String text = data.get(position);
-
-        if (holder.textView.getContext().getResources().getConfiguration().orientation
-                != Configuration.ORIENTATION_LANDSCAPE) {
-            holder.textView.setBackgroundColor(Color.TRANSPARENT);
-        }
-
-        holder.itemView.setBackgroundColor(selectedPos == position ? Color.GREEN : Color.TRANSPARENT);
-
         holder.setTextToTextView(text);
         holder.setOnClickForItem(text);
     }

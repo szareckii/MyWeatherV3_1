@@ -1,6 +1,7 @@
 package com.geekbrains.myweatherv3;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -35,9 +37,10 @@ public class RecyclerDataAdapterForDays extends RecyclerView.Adapter<RecyclerDat
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         holder.textDay.setText(data.get(position).textDay);
+//        holder.textDay.setTextColor(Color.parseColor("#DC1919"));
         holder.texTemptDay.setText(data.get(position).texTemptDay);
-        holder.drawableDayImageView.setImageDrawable(data.get(position).drawableDay);
         holder.texTemptNight.setText(data.get(position).texTemptNight);
+        holder.drawableDayImageView.setImageDrawable(data.get(position).drawableDay);
     }
 
     @Override
@@ -56,8 +59,8 @@ public class RecyclerDataAdapterForDays extends RecyclerView.Adapter<RecyclerDat
 
             textDay = itemView.findViewById(R.id.itemDayTextView);
             texTemptDay = itemView.findViewById(R.id.itemTempDayTextView);
-            drawableDayImageView = itemView.findViewById(R.id.typeDayImageView);
             texTemptNight = itemView.findViewById(R.id.itemTempNightTextView);
+            drawableDayImageView = itemView.findViewById(R.id.typeDayImageView);
         }
     }
 }
