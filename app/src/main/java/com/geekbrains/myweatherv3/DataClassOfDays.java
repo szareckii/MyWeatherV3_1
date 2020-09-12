@@ -1,6 +1,8 @@
 package com.geekbrains.myweatherv3;
 
-public class DataClassOfDays {
+import java.io.Serializable;
+
+public class DataClassOfDays implements Serializable {
     String textDay;
     String texTemptDay;
     String drawableDay;

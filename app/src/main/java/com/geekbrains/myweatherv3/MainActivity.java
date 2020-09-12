@@ -8,7 +8,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,8 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.geekbrains.myweatherv3.model.SearchRequest;
 import com.geekbrains.myweatherv3.weatherdata.CityDataOnlyNeed;
+import com.geekbrains.myweatherv3.weatherdata.RetrofitAdapter;
 import com.google.android.material.navigation.NavigationView;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +32,6 @@ import java.util.regex.Pattern;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private NavigationView navigationView;
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private DeveloperFragment developerFragment;
     private FeedbackFragment feedbackFragment;
     private static Parcel parcel;
-    private Pattern checkCityName = Pattern.compile("^[а-яА-ЯёЁa-zA-Z0-9]+$");
+    private Pattern checkCityName = Pattern.compile("^[а-яА-ЯёЁa-zA-Z0-9-]+$");
     private final String TAG_WEATHER = "class com.geekbrains.myweatherv3.WeatherFragment";
     private final String TAG_CITIES = "class com.geekbrains.myweatherv3.CitiesFragment";
     private final String TAG_SETTINGS = "class com.geekbrains.myweatherv3.SettingsFragment";
@@ -51,6 +53,12 @@ public class MainActivity extends AppCompatActivity {
     private Stack<Fragment> fragmentStack;
     private OpenWeather openWeather;
     private String msgError;
+    private SharedPreferences sharePref;
+    // имя файла настроек
+    public static final String APP_PREFERENCES = "mysettings";
+    public static final String APP_PREFERENCES_NAME = "currentСity";
+    public static final String APP_PREFERENCES_LON = "lon";
+    public static final String APP_PREFERENCES_LAT = "lat";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        Log.e(TAG, "MainActivity - onCreateView");
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         drawer = findViewById(R.id.drawer_layout);
@@ -81,7 +90,9 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         msgError = getString(R.string.check_cityname);
-        initRetorfit();
+
+        RetrofitAdapter retrofitAdapter = new RetrofitAdapter();
+        openWeather = retrofitAdapter.getOpenWeather();
 
         weatherFragment = new WeatherFragment();
         citiesFragment = new CitiesFragment();
@@ -89,25 +100,36 @@ public class MainActivity extends AppCompatActivity {
         developerFragment = new DeveloperFragment();
         feedbackFragment = new FeedbackFragment();
 
+        Log.e(TAG, "AFTER weatherFragment = new WeatherFragment()");
+
+        fragmentStack = new Stack<>();
+
         if (parcel == null) {
             String[] cities = getResources().getStringArray(R.array.cities);
             ArrayList<String> listData = new ArrayList<>(Arrays.asList(cities));
 
-            /*Создаем стэк вызовов фрагментов для дальнейшего испольхования в подсветке бокового меню*/
-            fragmentStack = new Stack<>();
+            /*Создаем стэк вызовов фрагментов для дальнейшего использования в подсветке бокового меню*/
             parcel = new Parcel("Москва", true, true,
-                    1, false, listData, 37.62f, 55.75f, TAG_WEATHER, fragmentStack);
-        } else {
-            fragmentStack = parcel.getFragmentStack();
+                    1, false, listData, 37.62f, 55.75f, TAG_WEATHER/*, fragmentStack*/);
         }
+
+        sharePref = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
+
+        //получение данных с SharePreference
+        if(sharePref.contains(APP_PREFERENCES_NAME)) {
+            parcel.setCityName(sharePref.getString(APP_PREFERENCES_NAME, ""));
+            parcel.setLon(sharePref.getFloat(APP_PREFERENCES_LON, 0f));
+            parcel.setLat(sharePref.getFloat(APP_PREFERENCES_LAT, 0f));
+            Log.e(TAG, "SharedPreferences. GET: " + parcel.getCityName());
+        }
+
+        setWeatherFragment();
 
         navigationView.setCheckedItem(R.id.nav_weather);
 
         if (parcel.getCurrentFragmentName() != null) {
             String tag = parcel.getCurrentFragmentName();
-            if(weatherFragment.getClass().toString().equals(tag)){
-                setWeatherFragment();
-            } else if(citiesFragment.getClass().toString().equals(tag)){
+            if(citiesFragment.getClass().toString().equals(tag)){
                 setCitiesFragment();
             } else if(settingsFragment.getClass().toString().equals(tag)){
                 setSettingsFragment();
@@ -116,11 +138,19 @@ public class MainActivity extends AppCompatActivity {
             } else if(feedbackFragment.getClass().toString().equals(tag)){
                 setFeedbackFragment();
             }
-        } else {
-            setWeatherFragment();
         }
 
         setOnClickForSideMenuItems();
+    }
+
+    // Сохраняем настройки
+    private void savePreferences(SharedPreferences sharedPref){
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(APP_PREFERENCES_NAME, parcel.getCityName());
+        editor.putFloat(APP_PREFERENCES_LON, parcel.getLon());
+        editor.putFloat(APP_PREFERENCES_LAT, parcel.getLat());
+        editor.apply();
+        Log.e(TAG, "SharedPreferences. PUT: " + parcel.getCityName());
     }
 
     /*Метод смены темы светлая-темная*/
@@ -135,6 +165,12 @@ public class MainActivity extends AppCompatActivity {
     }
     public static Parcel getParcel() {
         return parcel;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        savePreferences(sharePref);
     }
 
     @Override
@@ -193,7 +229,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*Метод нажатия кнопок в баре*/
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         /*если нажата кнопка "добавить город"*/
@@ -235,32 +270,25 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void initRetorfit() {
-        Retrofit retrofit;
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.openweathermap.org/") // Базовая часть адреса
-                // Конвертер, необходимый для преобразования JSON в объекты
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        // Создаём объект, при помощи которого будем выполнять запросы
-        openWeather = retrofit.create(OpenWeather.class);
-    }
-
-    private void requestRetrofit(String city) {
+    public void requestRetrofit(String city) {
         openWeather.loadCityCoord(city, BuildConfig.WEATHER_API_KEY, "ru")
                 .enqueue(new Callback<SearchRequest>() {
                     @Override
                     public void onResponse(@NonNull Call<SearchRequest> call, @NonNull Response<SearchRequest> response) {
                         if (response.body() != null && response.isSuccessful()) {
                             new CityDataOnlyNeed(parcel, response);
+                            Log.d(TAG, "new CityDataOnlyNeed(parcel, response);");
                             setWeatherFragment();
                         } else {
                             showToast(getString(R.string.check_cityname));
+                            Log.d(TAG, "ACTIVITY response.body() = null");
                         }
                     }
                     @Override
                     public void onFailure(@NonNull Call<SearchRequest> call, @NonNull Throwable t) {
                         showToast(getString(R.string.check_cityname));
+                        Log.d(TAG, "failure " + t);
+                        Log.d(TAG, "ACTIVITY onFailure");
                     }
                 });
     }
@@ -371,7 +399,6 @@ public class MainActivity extends AppCompatActivity {
         setFragment(weatherFragment, TAG_WEATHER);
         fragmentStack.push(weatherFragment);
         navigationView.setCheckedItem(R.id.nav_weather);
-        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setCitiesFragment() {
@@ -379,7 +406,6 @@ public class MainActivity extends AppCompatActivity {
         citiesFragment = new CitiesFragment();
         setFragment(citiesFragment, TAG_CITIES);
         fragmentStack.push(citiesFragment);
-        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setSettingsFragment() {
@@ -387,7 +413,6 @@ public class MainActivity extends AppCompatActivity {
         settingsFragment = new SettingsFragment();
         setFragment(settingsFragment, TAG_SETTINGS);
         fragmentStack.push(settingsFragment);
-        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setDeveloperFragment() {
@@ -395,7 +420,6 @@ public class MainActivity extends AppCompatActivity {
         developerFragment = new DeveloperFragment();
         setFragment(developerFragment, TAG_DEVELOPER);
         fragmentStack.push(developerFragment);
-        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setFeedbackFragment() {
@@ -403,7 +427,6 @@ public class MainActivity extends AppCompatActivity {
         feedbackFragment = new FeedbackFragment();
         setFragment(feedbackFragment, TAG_FEEDBACK);
         fragmentStack.push(feedbackFragment);
-        parcel.setFragmentStack(fragmentStack);
     }
 
     private void setFragment(Fragment fragment, String tag) {
