@@ -33,7 +33,12 @@ import com.geekbrains.myweatherv3.model.SearchRequest;
 import com.geekbrains.myweatherv3.receiver.WiFiChangeReceiver;
 import com.geekbrains.myweatherv3.weatherdata.CityDataOnlyNeed;
 import com.geekbrains.myweatherv3.weatherdata.RetrofitAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -132,19 +137,14 @@ public class MainActivity extends AppCompatActivity {
 
         initBroadcastReceiver();
 
-//        Log.e(TAG, "1111111messageReceiver.isStatusConnection(): " + messageReceiver.isStatusConnection());
-//        if (messageReceiver.isStatusConnection()) {
-//            Log.e(TAG, "1111requestRetrofit(cityName);");
-//        } else {
-//            Log.e(TAG, "11111setAlertConnection()");
-//        }
-
         setFragment();
 
         setOnClickForSideMenuItems();
 
-        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
+        initGetToken();
+        initNotificationChannel();
 
+        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
     }
 
     //Метод регистрации BroadcastReceiver
@@ -158,11 +158,46 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(messageReceiver, intFilt);
     }
 
+
+    private void initGetToken() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("PushMessage", "getInstanceId failed", task.getException());
+                        return;
+                    }
+
+                    // Get new Instance ID token
+                    String token = Objects.requireNonNull(task.getResult()).getToken();
+//                        textToken.setText(token);
+                });
+    }
+
+    // инициализация канала нотификаций
+    private void initNotificationChannel() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel channel = new NotificationChannel("3", "Messages", importance);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
 //        Toast.makeText(this, "onResume", Toast.LENGTH_SHORT).show();
-        setFragment();
+
+
+
+
+
+
+
+
+
+//        setFragment();
     }
 
     @Override

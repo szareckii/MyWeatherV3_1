@@ -67,7 +67,7 @@ public class WiFiChangeReceiver extends BroadcastReceiver {
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_LOW;
-            NotificationChannel channel = new NotificationChannel("2", "name", importance);
+            NotificationChannel channel = new NotificationChannel("2", "Connection", importance);
             notificationManager.createNotificationChannel(channel);
         }
     }

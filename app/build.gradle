@@ -17,7 +17,7 @@ android {
     buildTypes.each {
         Properties properties = new Properties()
         properties.load(project.rootProject.file("apikey.properties").newDataInputStream())
-        def weatherApiKey  = properties.getProperty("weather_api_key", "")
+        def weatherApiKey = properties.getProperty("weather_api_key", "")
         it.buildConfigField "String", "WEATHER_API_KEY", weatherApiKey
     }
 
@@ -44,6 +44,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.3.0'
     implementation 'androidx.navigation:navigation-ui:2.3.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'com.google.firebase:firebase-messaging:20.2.4'
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -55,3 +56,5 @@ dependencies {
     annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
 }
+
+apply plugin: 'com.google.gms.google-services'

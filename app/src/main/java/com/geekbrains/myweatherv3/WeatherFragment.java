@@ -70,7 +70,6 @@ public class WeatherFragment extends Fragment {
         findCurrentHour();
 
         //RETROFIT
-
         RetrofitAdapter retrofitAdapter = new RetrofitAdapter();
         openWeather = retrofitAdapter.getOpenWeather();
 
