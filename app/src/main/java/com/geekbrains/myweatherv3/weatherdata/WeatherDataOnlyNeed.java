@@ -54,7 +54,6 @@ public class WeatherDataOnlyNeed {
         parcel.setDataDays(dataDays);
         Log.e(TAG, "WeatherDataOnlyNeed-displayWeather");
 
-        parcel.setRequestWeatherFlag(1);
     }
 
     private DataClassOfDays[] getDataClassOfDays(WeatherRequest weatherRequest) {

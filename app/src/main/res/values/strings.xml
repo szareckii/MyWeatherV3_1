@@ -2,7 +2,7 @@
     <string name="app_name">My weather</string>
     <string name="textCity">NameCity</string>
     <string name="cityNameMoscow">Moscow</string>
-    <string name="textTempCurrent">textTempCurrent</string>
+    <string name="textTempCurrent">temp</string>
     <string name="textNow">Now</string>
     <string name="textPlusOneHour">TextView</string>
     <string name="textPlusThreeHours">TextView</string>
@@ -88,8 +88,11 @@
     <string name="add_city">add</string>
     <string name="done">Done</string>
     <string name="enter_name">Enter city</string>
-    <string name="exclamation">Error!</string>
+    <string name="exclamation">Error</string>
+    <string name="turn_on_wifi">Wi-Fi</string>
     <string name="press_button">City not found. Fail connection!</string>
     <string name="check_weather">Server error</string>
+    <string name="internet_connection_status_false">Not connection</string>
+    <string name="weather_update_status">Weather update is not possible</string>
 </resources>
 

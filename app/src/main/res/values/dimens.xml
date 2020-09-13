@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="sizeTextItem">18sp</dimen>
+    <dimen name="sizeTextItem">16sp</dimen>
     <dimen name="sizeTempTextItem">16sp</dimen>
     <dimen name="sizeCityNameLand">16sp</dimen>
     <dimen name="activity_horizontal_margin">16dp</dimen>

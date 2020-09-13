@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:text="@string/search_history"
         style="@style/MarginStartEndWithTextSize"
-        android:textSize="22dp"
+        android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

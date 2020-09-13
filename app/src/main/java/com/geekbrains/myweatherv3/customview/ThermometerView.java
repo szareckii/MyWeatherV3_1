@@ -19,6 +19,7 @@ public class ThermometerView extends View {
 
     // Цвет градусника
     private int batteryColor = Color.GRAY;
+//    private int batteryColor = R.color.thermometer;
     // Цвет уровня градусника
     private int levelColor = Color.RED;
     // Цвет уровня градусника при нажатии
@@ -30,12 +31,14 @@ public class ThermometerView extends View {
     // "Краска" уровня заряда при касании +
     private Paint levelPressedPaint;
     // Изображение носика градусника
-    private float cx, cy;
+    private int cx, cy;
 
     // "Краска" батареи
     private Paint batteryPaint;
     // "Краска" заряда
     private Paint levelPaint;
+    // Уровень заряда
+    private int level = 70;
 
     // Касаемся элемента
     private boolean pressed = false;
@@ -47,12 +50,10 @@ public class ThermometerView extends View {
     private final static int padding = 10;
     // Скругление углов батареи
     private final static int round = 20;
-    // Ширина головы батареи
-    private final static int headWidth = 10;
     //Радиус носика градусника
-    private final static int radius = 25;
+    private final static int radius = 15;
     //Радиус капли "ртути" в носике градусника
-    private final static int radiusRed = 15;
+    private final static int radiusRed = 8;
 
     public ThermometerView(Context context) {
         super(context);
@@ -92,7 +93,6 @@ public class ThermometerView extends View {
     // Инициализация атрибутов пользовательского элемента из xml
     @SuppressLint("ResourceAsColor")
     private void initAttr(Context context, AttributeSet attrs){
-
         // При помощи этого метода получаем доступ к набору атрибутов.
         // На выходе - массив со значениями
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ThermometerView, 0, 0);
@@ -100,10 +100,11 @@ public class ThermometerView extends View {
         // Чтобы получить какое-либо значение из этого массива,
         // надо вызвать соответствующий метод и передать в этот метод имя
         // ресурса, указанного в файле определения атрибутов (attrs.xml)
-        batteryColor = typedArray.getColor(R.styleable.ThermometerView_battery_color, Color.GRAY);
-
         // Вторым параметром идёт значение по умолчанию. Оно будет подставлено,
         // если атрибут не будет указан в макете
+        batteryColor = typedArray.getColor(R.styleable.ThermometerView_battery_color, Color.GRAY);
+//         batteryColor = typedArray.getColor(R.styleable.ThermometerView_battery_color, R.color.thermometer);
+
         levelColor = typedArray.getColor(R.styleable.ThermometerView_level_color, Color.RED);
 
         levelPressedColor = typedArray.getColor(R.styleable.ThermometerView_level_pressed_color, Color.GREEN);
@@ -122,6 +123,7 @@ public class ThermometerView extends View {
     private void init(){
         batteryPaint = new Paint();
         batteryPaint.setColor(batteryColor);
+//        batteryPaint.setARGB(80, batteryColor);
         batteryPaint.setStyle(Paint.Style.FILL);
         levelPaint = new Paint();
         levelPaint.setColor(levelColor);
@@ -149,20 +151,19 @@ public class ThermometerView extends View {
         int height = h - getPaddingTop() - getPaddingBottom();
 
         // Отрисовка тела градусника
-        batteryRectangle.set(padding,
+        batteryRectangle.set((int)(1.5f * padding),
                 padding,
-                width - padding - headWidth,
+                width - (int)(1.5f * padding),
                 height - padding);
 
         // Отрисовка ртутного столба градусника
-        levelRectangle.set((int)(2.2f * padding),
-//                (int)((height)*((double)level/(double)100)),
+        levelRectangle.set(width / 2  - 3,
                 2 * padding,
-                (int)(width - 3.2f * padding),
+                (width / 2 + 3),
                 height - padding);
 
         //получение координат для носика
-        cx = padding + 15;
+        cx = width / 2;
         cy = height - radius;
     }
 

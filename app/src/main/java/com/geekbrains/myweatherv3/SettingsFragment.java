@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
@@ -47,17 +48,14 @@ public class SettingsFragment extends Fragment implements SeekBar.OnSeekBarChang
 
     /*Метод переключения темы - светлая-темная*/
     private void setDarkThemeClickBehavior() {
-        switchSetLightDarkTheme.setOnClickListener(view -> {
-            if (switchSetLightDarkTheme.isChecked()) {
-                parcel.setDarkTheme(switchSetLightDarkTheme.isChecked());
-                ((MainActivity) requireActivity()).ToggleTheme(switchSetLightDarkTheme.isChecked());
+        switchSetLightDarkTheme.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+        parcel.setDarkTheme(switchSetLightDarkTheme.isChecked());
+        ((MainActivity) requireActivity()).ToggleTheme(switchSetLightDarkTheme.isChecked());
+            } else {
+        parcel.setDarkTheme(switchSetLightDarkTheme.isChecked());
+        ((MainActivity) requireActivity()).ToggleTheme(switchSetLightDarkTheme.isChecked());
             }
-            else{
-                parcel.setDarkTheme(switchSetLightDarkTheme.isChecked());
-                ((MainActivity) requireActivity()).ToggleTheme(switchSetLightDarkTheme.isChecked());
-            }
-
-
         });
     }
 

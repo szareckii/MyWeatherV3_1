@@ -11,8 +11,8 @@ public interface OpenWeather {
 
     @GET("data/2.5/onecall")
     Call<WeatherRequest> loadWeather(@Query("exclude") String exclude, @Query("units") String units,
-                                     @Query("appid") String keyApi, @Query("lat") Float lat,
-                                     @Query("lon") Float lon);
+                                     @Query("appid") String keyApi, @Query("lat") float lat,
+                                     @Query("lon") float lon);
 
     @GET("data/2.5/weather")
     Call<SearchRequest> loadCityCoord(@Query("q") String cityCountry, @Query("appid") String keyApi,

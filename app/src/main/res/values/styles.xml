@@ -19,10 +19,11 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDarkDarkTheme</item>
         <item name="colorAccent">@color/colorAccentDarkTheme</item>
         <item name="android:textColorPrimary">@color/textViewColorDarkTheme</item>
-
+        <item name="android:actionMenuTextColor">@color/textViewColorDarkTheme</item>
         <item name="colorOnSurface">@color/colorAccentDarkTheme</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:textColor">@color/colorAccentDarkTheme</item>
     </style>
 
     <style name="Text">

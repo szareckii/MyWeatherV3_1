@@ -1,7 +1,5 @@
 package com.geekbrains.myweatherv3;
 
-import android.graphics.drawable.Drawable;
-
 public class DataClassOfDaysWithDrawable {
     String textDay;
     String texTemptDay;

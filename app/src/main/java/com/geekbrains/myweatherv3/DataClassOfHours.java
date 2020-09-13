@@ -1,6 +1,8 @@
 package com.geekbrains.myweatherv3;
 
-public class DataClassOfHours {
+import java.io.Serializable;
+
+public class DataClassOfHours implements Serializable {
     String textHour;
     String drawableHourImageView;
     String texTempHour;

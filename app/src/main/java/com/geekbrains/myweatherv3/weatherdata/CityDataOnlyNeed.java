@@ -4,8 +4,6 @@ import android.util.Log;
 import com.geekbrains.myweatherv3.Parcel;
 import com.geekbrains.myweatherv3.model.SearchRequest;
 
-import java.util.ArrayList;
-
 import retrofit2.Response;
 
 public class CityDataOnlyNeed {
@@ -23,12 +21,8 @@ public class CityDataOnlyNeed {
         float lat = response.body().getCoord().getLat();
         Log.e(TAG, "CityCoordinates. Coord: lon - " + lon + " lat: " + lat);
         Log.e(TAG, "requestFlag: 1");
-        ArrayList<String> listData = parcel.getDataCites();
-        listData.add(response.body().getName());
-        parcel.setDataCites(listData);
         parcel.setCityName(response.body().getName());
         parcel.setLat(lat);
         parcel.setLon(lon);
-        parcel.setRequestFlag(1);
     }
 }

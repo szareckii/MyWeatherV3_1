@@ -9,4 +9,5 @@
     <color name="colorAccentDarkTheme">#03DAC5</color>
     <color name="textViewColorDarkTheme">#ffffff</color>
     <color name="textWeekend">#DC1919</color>
+    <color name="thermometer">#F62525</color>
 </resources>

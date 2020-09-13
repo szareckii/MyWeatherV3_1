@@ -2,7 +2,7 @@
     <string name="app_name">Моя погода</string>
     <string name="textCity">TextView</string>
     <string name="cityNameMoscow">Москва</string>
-    <string name="textTempCurrent">textTempCurrent</string>
+    <string name="textTempCurrent">temp</string>
     <string name="textNow">Сейчас</string>
     <string name="textPlusOneHour">TextView</string>
     <string name="textPlusThreeHours">TextView</string>
@@ -88,7 +88,10 @@
     <string name="add_city">Добавить</string>
     <string name="done">Готово</string>
     <string name="enter_name">Введите город</string>
-    <string name="exclamation">Ошибка!</string>
+    <string name="exclamation">Ошибка</string>
     <string name="press_button">Город не найден. Ошибка подключения!</string>
     <string name="check_weather">Ошибка сервера</string>
+    <string name="internet_connection_status_false">Соединения отсутствуют</string>
+    <string name="weather_update_status">Обновление погоды невозможно</string>
+    <string name="turn_on_wifi">Wi-Fi</string>
 </resources>

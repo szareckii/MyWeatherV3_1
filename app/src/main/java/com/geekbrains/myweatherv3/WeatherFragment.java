@@ -2,9 +2,6 @@ package com.geekbrains.myweatherv3;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,32 +10,29 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.geekbrains.myweatherv3.model.WeatherRequest;
-import com.geekbrains.myweatherv3.weatherdata.WeatherDataOnlyNeed;
-import com.squareup.picasso.Downloader;
-import com.squareup.picasso.OkHttp3Downloader;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
+import com.geekbrains.myweatherv3.bd.App;
+import com.geekbrains.myweatherv3.bd.City;
+import com.geekbrains.myweatherv3.bd.WeatherDao;
+import com.geekbrains.myweatherv3.bd.WeatherSource;
+import com.geekbrains.myweatherv3.model.WeatherRequest;
+import com.geekbrains.myweatherv3.weatherdata.RetrofitAdapter;
+import com.geekbrains.myweatherv3.weatherdata.WeatherDataOnlyNeed;
+import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class WeatherFragment extends Fragment {
     private TextView textTempCurrent;
@@ -56,6 +50,8 @@ public class WeatherFragment extends Fragment {
     private RecyclerView daysRecyclerView;
     private RecyclerView hoursRecyclerView;
     private OpenWeather openWeather;
+    private WeatherSource weatherSource;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -65,7 +61,7 @@ public class WeatherFragment extends Fragment {
         setRetainInstance(true);
         findViews(layout);
 
-        Log.e(TAG, "setWeatherFragment - onCreateView");
+        Log.e(TAG, "WeatherFragment - onCreateView");
         parcel = MainActivity.getParcel();
         parcel.setCurrentFragmentName(Objects.requireNonNull(requireActivity().getSupportFragmentManager().findFragmentById(R.id.container)).getTag());
         String cityName = parcel.getCityName();
@@ -73,21 +69,16 @@ public class WeatherFragment extends Fragment {
 
         findCurrentHour();
 
-        initRetorfit();
+        //RETROFIT
+
+        RetrofitAdapter retrofitAdapter = new RetrofitAdapter();
+        openWeather = retrofitAdapter.getOpenWeather();
+
+        Log.d(TAG, "WeatherFragment - START RETROFIT");
         requestRetrofit(parcel.getLat(), parcel.getLon());
+        Log.d(TAG, "WeatherFragment - END RETROFIT");
 
         return layout;
-    }
-
-    private void initRetorfit() {
-        Retrofit retrofit;
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.openweathermap.org/") // Базовая часть адреса
-                // Конвертер, необходимый для преобразования JSON в объекты
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        // Создаём объект, при помощи которого будем выполнять запросы
-        openWeather = retrofit.create(OpenWeather.class);
     }
 
     private void requestRetrofit(Float lat, Float lon) {
@@ -98,20 +89,39 @@ public class WeatherFragment extends Fragment {
                     public void onResponse(@NonNull Call<WeatherRequest> call, @NonNull Response<WeatherRequest> response) {
                         if (response.body() != null && response.isSuccessful()) {
                             new WeatherDataOnlyNeed(parcel,  response);
+                            Log.d(TAG, " new WeatherDataOnlyNeed(parcel,  response);");
                             setWeatherData(parcel.getCountHoursBetweenForecasts());
                         } else {
                                 showToast(msgError);
+                            Log.e(TAG, "response.body() = null");
                         }
                     }
                     @Override
                     public void onFailure(@NonNull Call<WeatherRequest> call, @NonNull Throwable t) {
                             showToast(msgError);
+                        Log.e(TAG, "failure " + t);
                     }
                 });
     }
 
+    //запись города c историей в БД
+    private void addCityWithWeatherToDB(String cityName, float lon, float lat, Date dateTemp, String temper) {
+        new Thread(() -> {
+            WeatherDao weatherDao = App
+                    .getInstance()
+                    .getWeatherDao();
+            weatherSource = new WeatherSource(weatherDao);
+
+            City city = new City();
+            city.cityName = cityName;
+            city.lon = lon;
+            city.lat = lat;
+            weatherSource.addCityWithWeather(city, dateTemp, temper);
+        }).start();
+    }
+
     private void setWeatherData(int countHoursBetweenForecasts) {
-        Log.d(TAG, "setWeatherDate");
+        Log.d(TAG, "START setWeatherDate");
         textTempCurrent.setText(parcel.getTempCurrent());
         textWindNow.setText(parcel.getWindNow());
         textPressureNow.setText(parcel.getPressureNow());
@@ -150,6 +160,13 @@ public class WeatherFragment extends Fragment {
         listDaysWithDrawable.clear();
         listDaysWithDrawable.addAll(Arrays.asList(dataDays1));
         setupRecyclerViewDays(listDaysWithDrawable);
+
+        Log.d(TAG, "END setWeatherDate");
+
+        Date currentDate = new Date();
+        addCityWithWeatherToDB(parcel.getCityName(), parcel.getLon(), parcel.getLat(), currentDate, parcel.getTempCurrent());
+        Log.d(TAG, "END addCityWithWeatherToDB");
+
     }
 
     public void showToast(final String toast) {
