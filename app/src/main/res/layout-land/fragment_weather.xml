@@ -111,7 +111,7 @@
             style="@style/MarginStartEnd"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageTypsWeather" />
+            app:layout_constraintTop_toBottomOf="@+id/noConnectionTextView" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/daysRecyclerView"
@@ -122,6 +122,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/hoursRecyclerView"/>
+
+        <TextView
+            android:id="@+id/noConnectionTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/not_connection_weather"
+            app:layout_constraintEnd_toEndOf="@+id/imageTypsWeather"
+            app:layout_constraintHorizontal_bias="0.502"
+            app:layout_constraintStart_toEndOf="@+id/textTempCurrent"
+            app:layout_constraintTop_toBottomOf="@+id/imageTypsWeather" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

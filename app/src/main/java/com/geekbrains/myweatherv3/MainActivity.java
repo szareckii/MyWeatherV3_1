@@ -5,20 +5,16 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.NotificationCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,11 +29,8 @@ import com.geekbrains.myweatherv3.model.SearchRequest;
 import com.geekbrains.myweatherv3.receiver.WiFiChangeReceiver;
 import com.geekbrains.myweatherv3.weatherdata.CityDataOnlyNeed;
 import com.geekbrains.myweatherv3.weatherdata.RetrofitAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,8 +136,6 @@ public class MainActivity extends AppCompatActivity {
 
         initGetToken();
         initNotificationChannel();
-
-        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
     }
 
     //Метод регистрации BroadcastReceiver
@@ -164,12 +155,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
                         Log.w("PushMessage", "getInstanceId failed", task.getException());
-                        return;
                     }
-
-                    // Get new Instance ID token
-                    String token = Objects.requireNonNull(task.getResult()).getToken();
-//                        textToken.setText(token);
                 });
     }
 
@@ -181,23 +167,6 @@ public class MainActivity extends AppCompatActivity {
             NotificationChannel channel = new NotificationChannel("3", "Messages", importance);
             notificationManager.createNotificationChannel(channel);
         }
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        Toast.makeText(this, "onResume", Toast.LENGTH_SHORT).show();
-
-
-
-
-
-
-
-
-
-//        setFragment();
     }
 
     @Override
@@ -237,10 +206,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-//    public OpenWeather getOpenWeather() {
-//        return openWeather;
-//    }
 
     // Сохраняем настройки
     private void savePreferences(SharedPreferences sharedPref){

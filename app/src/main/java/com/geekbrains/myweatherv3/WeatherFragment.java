@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,6 +21,7 @@ import com.geekbrains.myweatherv3.bd.City;
 import com.geekbrains.myweatherv3.bd.WeatherDao;
 import com.geekbrains.myweatherv3.bd.WeatherSource;
 import com.geekbrains.myweatherv3.model.WeatherRequest;
+import com.geekbrains.myweatherv3.receiver.WiFiChangeReceiver;
 import com.geekbrains.myweatherv3.weatherdata.RetrofitAdapter;
 import com.geekbrains.myweatherv3.weatherdata.WeatherDataOnlyNeed;
 import com.squareup.picasso.Picasso;
@@ -40,6 +40,7 @@ public class WeatherFragment extends Fragment {
     private TextView textWindNow;
     private TextView textPressureNow;
     private TextView textWindDegree;
+    private TextView textNoConnection;
     private static final String TAG = "myLogs";
     private Parcel parcel;
     private TextView textUnitWind;
@@ -51,7 +52,6 @@ public class WeatherFragment extends Fragment {
     private RecyclerView hoursRecyclerView;
     private OpenWeather openWeather;
     private WeatherSource weatherSource;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -73,12 +73,18 @@ public class WeatherFragment extends Fragment {
         RetrofitAdapter retrofitAdapter = new RetrofitAdapter();
         openWeather = retrofitAdapter.getOpenWeather();
 
-        Log.d(TAG, "WeatherFragment - START RETROFIT");
-        requestRetrofit(parcel.getLat(), parcel.getLon());
-        Log.d(TAG, "WeatherFragment - END RETROFIT");
+        Log.d(TAG, "WiFiChangeReceiver.isStatusConnection() " + WiFiChangeReceiver.isStatusConnection());
+        if(WiFiChangeReceiver.isStatusConnection()) {
+            Log.d(TAG, "WeatherFragment - START RETROFIT");
+            requestRetrofit(parcel.getLat(), parcel.getLon());
+            Log.d(TAG, "WeatherFragment - END RETROFIT");
+        } else {
+            textNoConnection.setVisibility(View.VISIBLE);
+        }
 
         return layout;
     }
+
 
     private void requestRetrofit(Float lat, Float lon) {
         String msgError = getString(R.string.check_weather);
@@ -165,24 +171,10 @@ public class WeatherFragment extends Fragment {
         Date currentDate = new Date();
         addCityWithWeatherToDB(parcel.getCityName(), parcel.getLon(), parcel.getLat(), currentDate, parcel.getTempCurrent());
         Log.d(TAG, "END addCityWithWeatherToDB");
-
     }
 
     public void showToast(final String toast) {
         Toast.makeText(getActivity(), toast, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        Log.e(TAG, "setWeatherFragment! onViewCreated!");
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Log.e(TAG, "setWeatherFragment! onActivityCreated!");
     }
 
     /*Метод заполнения RecyclerView по часам*/
@@ -591,58 +583,58 @@ public class WeatherFragment extends Fragment {
         String typeWeatherURL = "";
         switch (typeWeather) {
             case "01d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/01d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163662.png";
                 break;
             case "02d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/02d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163661.png";
                 break;
             case "03d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/03d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163624.png";
                 break;
             case "04d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/04d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163634.png";
                 break;
             case "09d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/09d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163626.png";
                 break;
             case "10d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/10d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163657.png";
                 break;
             case "11d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/11d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163636.png";
                 break;
             case "13d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/13d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163629.png";
                 break;
             case "50d":
-                typeWeatherURL = "http://openweathermap.org/img/wn/50d@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163673.png";
                 break;
             case "01n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/01n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163645.png";
                 break;
             case "02n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/02n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163630.png";
                 break;
             case "03n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/03n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163624.png";
                 break;
             case "04n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/04n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163634.png";
                 break;
             case "09n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/09n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163626.png";
                 break;
             case "10n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/10n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163644.png";
                 break;
             case "11n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/11n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163636.png";
                 break;
             case "13n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/13n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163629.png";
                 break;
             case "50n":
-                typeWeatherURL = "http://openweathermap.org/img/wn/50n@2x.png";
+                typeWeatherURL = "https://image.flaticon.com/icons/png/64/1163/1163673.png";
                 break;
         }
         return typeWeatherURL;
@@ -660,6 +652,7 @@ public class WeatherFragment extends Fragment {
         textWindDegree = layout.findViewById(R.id.textWindDegree);
         daysRecyclerView = layout.findViewById(R.id.daysRecyclerView);
         hoursRecyclerView = layout.findViewById(R.id.hoursRecyclerView);
+        textNoConnection =  layout.findViewById(R.id.noConnectionTextView);
 
         setClearTextView();
     }
@@ -673,6 +666,7 @@ public class WeatherFragment extends Fragment {
         textPressureNow.setText("");
         textUnitPressureNow.setText("");
         imageTypesWeather.setImageResource(R.drawable.close);
+        textNoConnection.setVisibility(View.GONE);
     }
 
 }

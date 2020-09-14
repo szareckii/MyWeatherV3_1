@@ -1,6 +1,5 @@
 package com.geekbrains.myweatherv3.weatherdata;
 
-import com.geekbrains.myweatherv3.BuildConfig;
 import com.geekbrains.myweatherv3.OpenWeather;
 
 import okhttp3.OkHttpClient;

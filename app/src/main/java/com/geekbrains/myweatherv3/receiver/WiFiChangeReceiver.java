@@ -5,12 +5,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
@@ -21,7 +19,7 @@ import com.geekbrains.myweatherv3.R;
 public class WiFiChangeReceiver extends BroadcastReceiver {
     private static final String TAG = "myLogs";
     private NotificationManager notificationManager;
-    private static boolean statusConnection = false;
+    private static boolean statusConnection = true;
 
     // Сюда приходит широковещательное оповещение
     @Override
@@ -43,7 +41,7 @@ public class WiFiChangeReceiver extends BroadcastReceiver {
         }
     }
 
-    public boolean isStatusConnection() {
+    public static boolean isStatusConnection() {
         return statusConnection;
     }
 
@@ -90,7 +88,6 @@ public class WiFiChangeReceiver extends BroadcastReceiver {
                         (dialog, id) -> {
                             Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
                             context.startActivity(intent);
-//                                Toast.makeText(context, "Кнопка нажата", Toast.LENGTH_SHORT).show();
                         })
                 // Устанавливаем кнопку
                 .setPositiveButton(R.string.ok_button,
@@ -100,8 +97,8 @@ public class WiFiChangeReceiver extends BroadcastReceiver {
                         });
         AlertDialog alert = builder.create();
         alert.show();
-//        Toast.makeText(context, "Диалог открыт", Toast.LENGTH_SHORT).show();
     }
+
 
 
 }

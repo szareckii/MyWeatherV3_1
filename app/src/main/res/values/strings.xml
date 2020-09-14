@@ -94,5 +94,6 @@
     <string name="check_weather">Server error</string>
     <string name="internet_connection_status_false">Not connection</string>
     <string name="weather_update_status">Weather update is not possible</string>
+    <string name="not_connection_weather">Not connection. Weather update is not possible</string>
 </resources>
 

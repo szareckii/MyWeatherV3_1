@@ -93,5 +93,6 @@
     <string name="check_weather">Ошибка сервера</string>
     <string name="internet_connection_status_false">Соединения отсутствуют</string>
     <string name="weather_update_status">Обновление погоды невозможно</string>
+    <string name="not_connection_weather">Нет соединения. Обновление погоды невозможно</string>
     <string name="turn_on_wifi">Wi-Fi</string>
 </resources>
