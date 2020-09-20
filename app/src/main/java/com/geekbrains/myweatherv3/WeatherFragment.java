@@ -15,11 +15,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.geekbrains.myweatherv3.bd.App;
 import com.geekbrains.myweatherv3.bd.City;
 import com.geekbrains.myweatherv3.bd.WeatherDao;
 import com.geekbrains.myweatherv3.bd.WeatherSource;
+import com.geekbrains.myweatherv3.customview.ThermometerView;
 import com.geekbrains.myweatherv3.model.WeatherRequest;
 import com.geekbrains.myweatherv3.receiver.WiFiChangeReceiver;
 import com.geekbrains.myweatherv3.weatherdata.RetrofitAdapter;
@@ -52,6 +52,7 @@ public class WeatherFragment extends Fragment {
     private RecyclerView hoursRecyclerView;
     private OpenWeather openWeather;
     private WeatherSource weatherSource;
+    private ThermometerView thermometerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,7 +62,6 @@ public class WeatherFragment extends Fragment {
         setRetainInstance(true);
         findViews(layout);
 
-        Log.e(TAG, "WeatherFragment - onCreateView");
         parcel = MainActivity.getParcel();
         parcel.setCurrentFragmentName(Objects.requireNonNull(requireActivity().getSupportFragmentManager().findFragmentById(R.id.container)).getTag());
         String cityName = parcel.getCityName();
@@ -69,31 +69,30 @@ public class WeatherFragment extends Fragment {
 
         findCurrentHour();
 
-        //RETROFIT
         RetrofitAdapter retrofitAdapter = new RetrofitAdapter();
         openWeather = retrofitAdapter.getOpenWeather();
 
-        Log.d(TAG, "WiFiChangeReceiver.isStatusConnection() " + WiFiChangeReceiver.isStatusConnection());
-        if(WiFiChangeReceiver.isStatusConnection()) {
-            Log.d(TAG, "WeatherFragment - START RETROFIT");
-            requestRetrofit(parcel.getLat(), parcel.getLon());
-            Log.d(TAG, "WeatherFragment - END RETROFIT");
-        } else {
-            textNoConnection.setVisibility(View.VISIBLE);
-        }
+        startRequestRetrofit();
 
         return layout;
     }
 
+    private void startRequestRetrofit() {
+        if(WiFiChangeReceiver.isStatusConnection()) {
+            requestRetrofit(parcel.getLat(), parcel.getLon());
+        } else {
+            textNoConnection.setVisibility(View.VISIBLE);
+        }
+    }
 
-    private void requestRetrofit(Float lat, Float lon) {
+    private void requestRetrofit(float lat, float lon) {
         String msgError = getString(R.string.check_weather);
         openWeather.loadWeather("minutely", "metric", BuildConfig.WEATHER_API_KEY, lat, lon)
                 .enqueue(new Callback<WeatherRequest>() {
                     @Override
                     public void onResponse(@NonNull Call<WeatherRequest> call, @NonNull Response<WeatherRequest> response) {
                         if (response.body() != null && response.isSuccessful()) {
-                            new WeatherDataOnlyNeed(parcel,  response);
+                            new WeatherDataOnlyNeed(parcel, response);
                             Log.d(TAG, " new WeatherDataOnlyNeed(parcel,  response);");
                             setWeatherData(parcel.getCountHoursBetweenForecasts());
                         } else {
@@ -131,6 +130,7 @@ public class WeatherFragment extends Fragment {
         textWindNow.setText(parcel.getWindNow());
         textPressureNow.setText(parcel.getPressureNow());
         textWindDegree.setText(getDegreeWind(parcel.getWindDegree()));
+        thermometerView.setTemperature(parcel.getTempCurrentInt());
 
         Picasso.get()
                 .load(setIconWeatherURL(parcel.getTypesWeather()))
@@ -165,12 +165,12 @@ public class WeatherFragment extends Fragment {
         listDaysWithDrawable.clear();
         listDaysWithDrawable.addAll(Arrays.asList(dataDays1));
         setupRecyclerViewDays(listDaysWithDrawable);
-
         Log.d(TAG, "END setWeatherDate");
 
         Date currentDate = new Date();
         addCityWithWeatherToDB(parcel.getCityName(), parcel.getLon(), parcel.getLat(), currentDate, parcel.getTempCurrent());
         Log.d(TAG, "END addCityWithWeatherToDB");
+
     }
 
     public void showToast(final String toast) {
@@ -653,6 +653,7 @@ public class WeatherFragment extends Fragment {
         daysRecyclerView = layout.findViewById(R.id.daysRecyclerView);
         hoursRecyclerView = layout.findViewById(R.id.hoursRecyclerView);
         textNoConnection =  layout.findViewById(R.id.noConnectionTextView);
+        thermometerView = layout.findViewById(R.id.thermometerView);
 
         setClearTextView();
     }

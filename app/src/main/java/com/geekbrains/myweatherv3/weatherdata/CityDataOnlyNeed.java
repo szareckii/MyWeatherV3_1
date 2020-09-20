@@ -20,7 +20,6 @@ public class CityDataOnlyNeed {
         float lon = response.body().getCoord().getLon();
         float lat = response.body().getCoord().getLat();
         Log.e(TAG, "CityCoordinates. Coord: lon - " + lon + " lat: " + lat);
-        Log.e(TAG, "requestFlag: 1");
         parcel.setCityName(response.body().getName());
         parcel.setLat(lat);
         parcel.setLon(lon);

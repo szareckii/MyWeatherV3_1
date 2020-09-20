@@ -22,7 +22,6 @@ import com.geekbrains.myweatherv3.model.SearchRequest;
 import com.geekbrains.myweatherv3.weatherdata.CityDataOnlyNeed;
 import com.geekbrains.myweatherv3.weatherdata.RetrofitAdapter;
 import com.google.android.material.snackbar.Snackbar;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import retrofit2.Call;
@@ -34,7 +33,6 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
     private static final String TAG = "myLogs";
     private View rootView;
     private RecyclerView recyclerView;
-    private ArrayList<String> listData;
     private Parcel parcel;
     private OpenWeather openWeather;
     private List<CityWithHistory> cities;
@@ -80,7 +78,6 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
     private void setupRecyclerView() {
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        listData = parcel.getDataCites();
         recyclerView.setLayoutManager(layoutManager);
         RecyclerHistoryAdapter adapter = new RecyclerHistoryAdapter(cities, this);
         recyclerView.setAdapter(adapter);
@@ -100,23 +97,15 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
         Snackbar.make(requireView(), getString(R.string.choose_city_snackbar) + " " + itemText + "?",  Snackbar.LENGTH_LONG)
                 .setAction(R.string.ok_button, v -> {
                     Log.d(TAG, "RecyclerDataAdapter. setOnClickForItem() - " + itemText);
-                    boolean visibleWind = parcel.isVisibleWind();
-                    boolean visiblePressure = parcel.isVisiblePressure();
-                    boolean darkTheme = parcel.isDarkTheme();
-                    int countHoursBetweenForecasts = parcel.getCountHoursBetweenForecasts();
-
                     parcel.setCityName(itemText);
-                    parcel.setVisibleWind(visibleWind);
-                    parcel.setVisiblePressure(visiblePressure);
-                    parcel.setCountHoursBetweenForecasts(countHoursBetweenForecasts);
-                    parcel.setDarkTheme(darkTheme);
-                    parcel.setDataCites(listData);
-                    parcel.setLon(lon);
                     parcel.setLat(lat);
+                    parcel.setLon(lon);
 
-                    requestRetrofit(itemText);
+                    if (itemText.charAt(0) != '(') {
+                        requestRetrofit(itemText);
+                    }
 
-//                    //Заменяем на фрагмент с погодой
+                    //Заменяем на фрагмент с погодой
                     if (getActivity() != null) {
                         MainActivity ma = (MainActivity) getActivity();
                         ma.setWeatherFragment();
@@ -139,7 +128,6 @@ public class CitiesFragment extends Fragment  implements IRVOnItemClick {
                     public void onResponse(@NonNull Call<SearchRequest> call, @NonNull Response<SearchRequest> response) {
                         if (response.body() != null && response.isSuccessful()) {
                             new CityDataOnlyNeed(parcel, response);
-
                         } else {
                             showToast(getString(R.string.check_cityname));
                         }

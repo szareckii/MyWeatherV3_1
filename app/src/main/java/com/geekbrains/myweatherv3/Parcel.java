@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class Parcel implements Serializable {
     private String cityName;
     private String tempCurrent;
+    private int tempCurrentInt;
     private String windNow;
     private String pressureNow;
     private int windDegree;
@@ -16,7 +17,6 @@ public class Parcel implements Serializable {
     private boolean visiblePressure;
     private int countHoursBetweenForecasts;
     private boolean darkTheme;
-    private ArrayList<String> dataCites;
     private float lon;
     private float lat;
     private String currentFragmentName;
@@ -50,9 +50,6 @@ public class Parcel implements Serializable {
         this.cityName = cityName;
     }
 
-    public void setDataCites(ArrayList<String> dataCites) {
-        this.dataCites = dataCites;
-    }
 
     public String getCityName() {
         return cityName;
@@ -74,9 +71,6 @@ public class Parcel implements Serializable {
         return countHoursBetweenForecasts;
     }
 
-    public ArrayList<String> getDataCites() {
-        return dataCites;
-    }
 
     public void setVisibleWind(boolean visibleWind) {
         this.visibleWind = visibleWind;
@@ -111,13 +105,12 @@ public class Parcel implements Serializable {
     }
 
     public Parcel(String cityName, boolean visibleWind, boolean visiblePressure, int countHoursBetweenForecasts,
-                  boolean darkTheme, ArrayList<String> data, float lon, float lat, String currentFragmentName) {
+                  boolean darkTheme, float lon, float lat, String currentFragmentName) {
         this.cityName = cityName;
         this.visibleWind = visibleWind;
         this.visiblePressure = visiblePressure;
         this.countHoursBetweenForecasts = countHoursBetweenForecasts;
         this.darkTheme = darkTheme;
-        this.dataCites = data;
         this.lon = lon;
         this.lat = lat;
         this.currentFragmentName = currentFragmentName;
@@ -129,6 +122,14 @@ public class Parcel implements Serializable {
 
     public void setTempCurrent(String tempCurrent) {
         this.tempCurrent = tempCurrent;
+    }
+
+    public int getTempCurrentInt() {
+        return tempCurrentInt;
+    }
+
+    public void setTempCurrentInt(int tempCurrentInt) {
+        this.tempCurrentInt = tempCurrentInt;
     }
 
     public String getWindNow() {

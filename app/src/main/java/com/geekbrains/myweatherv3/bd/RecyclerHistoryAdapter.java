@@ -37,7 +37,6 @@ public class RecyclerHistoryAdapter extends RecyclerView.Adapter<RecyclerHistory
     @Override
     public void onBindViewHolder(@NonNull RecyclerHistoryAdapter.ViewHolder holder, int position) {
 
-//        List<CityWithHistory> citiesWithHistory = dataSource.getCitiesWithHistory();
         CityWithHistory cityWithHistory = citiesWithHistory.get(position);
 
         @SuppressLint("SimpleDateFormat")

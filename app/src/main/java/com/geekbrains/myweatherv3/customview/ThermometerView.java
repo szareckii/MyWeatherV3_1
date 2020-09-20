@@ -32,18 +32,15 @@ public class ThermometerView extends View {
     private Paint levelPressedPaint;
     // Изображение носика градусника
     private int cx, cy;
+    private int width;
+    private int height;
 
-    // "Краска" батареи
-    private Paint batteryPaint;
-    // "Краска" заряда
+    // "Краска" градусника
+    private Paint ThermometerPaint;
+    // "Краска" ртути
     private Paint levelPaint;
-    // Уровень заряда
+    // Уровень температуры
     private int level = 70;
-
-    // Касаемся элемента
-    private boolean pressed = false;
-    // Слушатель касания
-    private OnClickListener listener;
 
     // Константы
     // Отступ элементов
@@ -51,9 +48,13 @@ public class ThermometerView extends View {
     // Скругление углов батареи
     private final static int round = 20;
     //Радиус носика градусника
-    private final static int radius = 15;
+    private final static int radius = 25;
     //Радиус капли "ртути" в носике градусника
-    private final static int radiusRed = 8;
+    private final static int radiusRed = 15;
+    private final static int minTemp = -50;
+    private final static int maxTemp = 50;
+
+    private int temp;
 
     public ThermometerView(Context context) {
         super(context);
@@ -109,7 +110,7 @@ public class ThermometerView extends View {
 
         levelPressedColor = typedArray.getColor(R.styleable.ThermometerView_level_pressed_color, Color.GREEN);
 
-        // Уровень заряда
+        // Уровень температуры
         int level = typedArray.getInteger(R.styleable.ThermometerView_level, 100);
 
         // В конце работы дадим сигнал, что массив со значениями атрибутов
@@ -121,10 +122,10 @@ public class ThermometerView extends View {
     // Начальная инициализация полей класса
     @SuppressLint("ResourceAsColor")
     private void init(){
-        batteryPaint = new Paint();
-        batteryPaint.setColor(batteryColor);
+        ThermometerPaint = new Paint();
+        ThermometerPaint.setColor(batteryColor);
 //        batteryPaint.setARGB(80, batteryColor);
-        batteryPaint.setStyle(Paint.Style.FILL);
+        ThermometerPaint.setStyle(Paint.Style.FILL);
         levelPaint = new Paint();
         levelPaint.setColor(levelColor);
         levelPaint.setStyle(Paint.Style.FILL);
@@ -146,20 +147,14 @@ public class ThermometerView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         // Получаем реальные ширину и высоту
         // Ширина элемента
-        int width = w - getPaddingLeft() - getPaddingRight();
+        width = w - getPaddingLeft() - getPaddingRight();
         // Высота элемента
-        int height = h - getPaddingTop() - getPaddingBottom();
+        height = h - getPaddingTop() - getPaddingBottom();
 
         // Отрисовка тела градусника
-        batteryRectangle.set((int)(1.5f * padding),
+        batteryRectangle.set((int)(2.5f * padding),
                 padding,
-                width - (int)(1.5f * padding),
-                height - padding);
-
-        // Отрисовка ртутного столба градусника
-        levelRectangle.set(width / 2  - 3,
-                2 * padding,
-                (width / 2 + 3),
+                width - (int)(2.5f * padding),
                 height - padding);
 
         //получение координат для носика
@@ -171,61 +166,32 @@ public class ThermometerView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawRoundRect(batteryRectangle, round, round, batteryPaint);
-        canvas.drawCircle(cx, cy, radius, batteryPaint);
+
+        canvas.drawRoundRect(batteryRectangle, round, round, ThermometerPaint);
+        canvas.drawCircle(cx, cy, radius, ThermometerPaint);
+        canvas.drawRect(levelRectangle, levelPaint);
         canvas.drawCircle(cx, cy, radiusRed, levelPaint);
-
-        // Условие отрисовки (нажат или не нажат элемент) +
-        if (pressed){
-            canvas.drawRect(levelRectangle, levelPressedPaint);
-        }
-        else {
-            canvas.drawRect(levelRectangle, levelPaint);
-        }
     }
 
-    // Этот метод срабатывает при касании элемента
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public boolean onTouchEvent(MotionEvent event){
-
-        // Получаем действие (касание, отпускание, перемещение и т. д.)
-        int Action = event.getAction();
-
-        // Проверка на начало касания (элемент нажат)
-        if(Action == MotionEvent.ACTION_DOWN){
-
-            // Установим признак того, что нажали элемент
-            pressed = true;
-
-            // Вызываем метод для перерисовки
-            invalidate();
-
-            // Если слушатель был установлен, то вызываем его метод
-            if (listener != null) {
-                listener.onClick(this);
-            }
+    public void setTemperature(float temp) {
+        if (temp > maxTemp) {
+            temp = maxTemp;
+        } else if (temp < minTemp) {
+            temp = minTemp;
         }
 
-        // Проверка на отпускание элемента (палец убран)
-        else if(Action == MotionEvent.ACTION_UP){
-
-            // Снимаем признак касания элемента
-            pressed = false;
-
-            // Перерисовка элемента
-            invalidate();
+        if (temp <= 0) {
+            levelPaint.setColor(getResources().getColor(R.color.colorBlue));
+        } else if (temp > 0 && temp < 20) {
+            levelPaint.setColor(getResources().getColor(R.color.colorYellow));
         }
+        levelPaint.setStyle(Paint.Style.FILL);
 
-        // Касание обработано, возвращаем true
-        return true;
+        // Отрисовка ртутного столба градусника
+        levelRectangle.set(width / 2  - 3,
+                (int) (height / 2 - (temp / maxTemp) * (height / 2) - padding),
+                (width / 2 + 3),
+                height - padding);
+        invalidate();
     }
-
-    // Устанавливаем слушатель
-    @Override
-    public void setOnClickListener(View.OnClickListener listener){
-        this.listener = listener;
-    }
-
-
 }

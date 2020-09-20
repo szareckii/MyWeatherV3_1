@@ -79,7 +79,7 @@
     <string name="menu_cities">История поиска</string>
     <string name="menu_settings">Настройки</string>
     <string name="about_developer">О разработчике</string>
-    <string name="feedback">Форма обратной связи</string>
+    <string name="map">Карта</string>
     <string name="phone">(492) 123–45–78</string>
     <string name="email">za@gmail.com</string>
     <string name="about_city_weather">Климат города (Вики)</string>
@@ -95,4 +95,6 @@
     <string name="weather_update_status">Обновление погоды невозможно</string>
     <string name="not_connection_weather">Нет соединения. Обновление погоды невозможно</string>
     <string name="turn_on_wifi">Wi-Fi</string>
+    <string name="current_position">Текущее местоположение</string>
+    <string name="not_supportet">Не поддерживается в Android 5.0</string>
 </resources>

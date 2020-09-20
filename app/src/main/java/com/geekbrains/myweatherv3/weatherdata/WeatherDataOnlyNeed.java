@@ -1,10 +1,13 @@
 package com.geekbrains.myweatherv3.weatherdata;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import com.geekbrains.myweatherv3.DataClassOfDays;
 import com.geekbrains.myweatherv3.DataClassOfHours;
 import com.geekbrains.myweatherv3.Parcel;
+import com.geekbrains.myweatherv3.customview.ThermometerView;
 import com.geekbrains.myweatherv3.model.WeatherRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,6 +16,7 @@ import java.util.Calendar;
 import retrofit2.Response;
 
 public class WeatherDataOnlyNeed {
+    private Context context;
     private Parcel parcel;
     private static final String TAG = "myLogs";
     private Calendar cDayPlusOne, cDayPlusTwo, cDayPlusThree, cDayPlusFour, cDayPlusFive, cDayPlusSix,
@@ -35,8 +39,10 @@ public class WeatherDataOnlyNeed {
     /*Метод записи погоды в View"*/
     private void displayWeather(Response<WeatherRequest> response) {
         assert response.body() != null;
-        int ft = Math.round(response.body().getCurrent().getTemp());
-        parcel.setTempCurrent(getStringTemp(ft));
+        int currentTemp = Math.round(response.body().getCurrent().getTemp());
+        parcel.setTempCurrent(getStringTemp(currentTemp));
+        parcel.setTempCurrentInt((int) currentTemp);
+
         String wind = String.valueOf(response.body().getCurrent().getWind_speed());
         parcel.setWindNow(wind);
         String pressure = String.valueOf((int) Math.round(response.body().getCurrent().getPressure() / 1.333));
@@ -52,6 +58,8 @@ public class WeatherDataOnlyNeed {
 
         DataClassOfDays[] dataDays = getDataClassOfDays(response.body());
         parcel.setDataDays(dataDays);
+
+
         Log.e(TAG, "WeatherDataOnlyNeed-displayWeather");
 
     }
@@ -211,11 +219,9 @@ public class WeatherDataOnlyNeed {
 
     /*Метод добавления знака температуре*/
     private String getStringTemp(int ft) {
-        String temp;
+        String temp = "";
         if (ft > 0) {
             temp = "+";
-        } else {
-            temp = "-";
         }
         temp += String.valueOf(ft);
         return temp;

@@ -64,10 +64,8 @@ public class WeatherSource {
         Log.e(TAG, "getCityByName(city.cityName)  -  " + city.cityName);
         if ( weatherDao.getCityByName(city.cityName) == 0) {
             id = weatherDao.insertCity(city);
-            Log.e(TAG, "!!!!weatherDao.insertCity(city): " + id);
         } else {
             id = weatherDao.getCityByName(city.cityName);
-            Log.e(TAG, "!!!!weatherDao.insertCity(0): " + id);
         }
 
         HistoryWeather historyWeather1 = new HistoryWeather();

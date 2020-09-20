@@ -10,4 +10,7 @@
     <color name="textViewColorDarkTheme">#ffffff</color>
     <color name="textWeekend">#DC1919</color>
     <color name="thermometer">#F62525</color>
+    <color name="colorBlue">#263BF6</color>
+    <color name="colorYellow">#F1F828</color>
+
 </resources>

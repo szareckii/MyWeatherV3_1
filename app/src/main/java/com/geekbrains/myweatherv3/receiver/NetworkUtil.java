@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 public class NetworkUtil {
 
     public static int TYPE_WIFI = 1;
+    public static int TYPE_MOBILE = 2;
     public static int TYPE_NOT_CONNECTED = 0;
 
     public static int getConnectivityStatus(Context context) {
@@ -20,6 +21,9 @@ public class NetworkUtil {
 
             if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI)
                 return TYPE_WIFI;
+
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE)
+                return TYPE_MOBILE;
         }
         return TYPE_NOT_CONNECTED;
     }
@@ -30,11 +34,13 @@ public class NetworkUtil {
 
         String statusNetwork = null;
         if (conn == NetworkUtil.TYPE_WIFI) {
-            //statusNetwork = "Wifi enabled";
+            statusNetwork = "Internet connection available";
+        } else if (conn == NetworkUtil.TYPE_MOBILE) {
             statusNetwork = "Internet connection available";
         } else if (conn == NetworkUtil.TYPE_NOT_CONNECTED) {
             statusNetwork = "Not connected to Internet";
         }
+
         return statusNetwork;
     }
 }

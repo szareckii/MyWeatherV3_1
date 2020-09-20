@@ -20,6 +20,8 @@ public class WiFiChangeReceiver extends BroadcastReceiver {
     private static final String TAG = "myLogs";
     private NotificationManager notificationManager;
     private static boolean statusConnection = true;
+    private static boolean alertHasShow = false;
+    private AlertDialog alert;
 
     // Сюда приходит широковещательное оповещение
     @Override
@@ -38,6 +40,10 @@ public class WiFiChangeReceiver extends BroadcastReceiver {
             Log.e(TAG, "connected to internet");
             statusConnection = true;
             notificationManager.cancelAll();
+            //если связь появилась вновь, то закрываем alertDialog
+            if (alertHasShow) {
+                alert.dismiss();
+            }
         }
     }
 
@@ -95,11 +101,9 @@ public class WiFiChangeReceiver extends BroadcastReceiver {
                         (dialog, id) -> {
 //                                Toast.makeText(context, "Кнопка нажата", Toast.LENGTH_SHORT).show();
                         });
-        AlertDialog alert = builder.create();
+        alert = builder.create();
         alert.show();
+        alertHasShow = true;
     }
-
-
-
 }
 
