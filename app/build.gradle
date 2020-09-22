@@ -26,10 +26,24 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        staging {
+            initWith debug
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    flavorDimensions 'view'
+    productFlavors {
+        demo {
+            dimension 'view'
+            versionNameSuffix '.demo'
+        }
+        master {
+            dimension 'view'
+            versionNameSuffix '.master'
+        }
     }
 }
 
@@ -56,6 +70,7 @@ dependencies {
     annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'com.google.android.gms:play-services-auth:18.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
         createNewFragment();
 
+        //Город по-умолчанию для первого запуска без геолокации
         if (parcel == null) {
             parcel = new Parcel("Москва", true, true,
                     1, false, 37.62f, 55.75f, TAG_WEATHER);
@@ -195,14 +197,12 @@ public class MainActivity extends AppCompatActivity {
         boolean hasVisited = sharePref.getBoolean(APP_PREFERENCES_VISIT, false);
 
         if (hasVisited) {
-            parcel.setCityName(sharePref.getString(APP_PREFERENCES_NAME,    ""));
+            parcel.setCityName(sharePref.getString(APP_PREFERENCES_NAME, ""));
             parcel.setLon(sharePref.getFloat(APP_PREFERENCES_LON, 0f));
             parcel.setLat(sharePref.getFloat(APP_PREFERENCES_LAT, 0f));
             Log.e(TAG, "SharedPreferences. GET: " + parcel.getCityName());
-            setFragment();
-        } else {
-            requestPermissions();
         }
+        setFragment();
     }
 
     // Сохраняем настройки
@@ -256,7 +256,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+        //Скрываем кнопку определения текущего местоположения в баре
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        MenuItem currentPositionItem = menu.findItem(R.id.action_current_position);
+        currentPositionItem.setVisible(false);
         return true;
     }
 
@@ -491,6 +495,7 @@ public class MainActivity extends AppCompatActivity {
         setFragment(weatherFragment, TAG_WEATHER);
         fragmentStack.push(weatherFragment);
         navigationView.setCheckedItem(R.id.nav_weather);
+        savePreferences(sharePref);
     }
 
     private void setCitiesFragment() {

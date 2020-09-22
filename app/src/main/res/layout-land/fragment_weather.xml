@@ -106,9 +106,9 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/hoursRecyclerView"
+            style="@style/MarginStartEnd"
             android:layout_width="match_parent"
             android:layout_height="95dp"
-            style="@style/MarginStartEnd"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/noConnectionTextView" />
@@ -133,7 +133,6 @@
             app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toEndOf="@+id/textTempCurrent"
             app:layout_constraintTop_toBottomOf="@+id/imageTypsWeather" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

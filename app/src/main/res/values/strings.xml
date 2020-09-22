@@ -97,5 +97,7 @@
     <string name="not_connection_weather">Not connection. Weather update is not possible</string>
     <string name="current_position">Current position</string>
     <string name="not_supportet">Not supported in Android 5.0</string>
+    <string name="welcome">Welcome</string>
+    <string name="sign_out">Sign out</string>
 </resources>
 

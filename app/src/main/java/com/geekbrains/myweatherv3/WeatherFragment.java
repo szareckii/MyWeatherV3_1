@@ -61,7 +61,7 @@ public class WeatherFragment extends Fragment {
         View layout = inflater.inflate(R.layout.fragment_weather, container, false);
         setRetainInstance(true);
         findViews(layout);
-
+        setClearTextView();
         parcel = MainActivity.getParcel();
         parcel.setCurrentFragmentName(Objects.requireNonNull(requireActivity().getSupportFragmentManager().findFragmentById(R.id.container)).getTag());
         String cityName = parcel.getCityName();
@@ -654,8 +654,6 @@ public class WeatherFragment extends Fragment {
         hoursRecyclerView = layout.findViewById(R.id.hoursRecyclerView);
         textNoConnection =  layout.findViewById(R.id.noConnectionTextView);
         thermometerView = layout.findViewById(R.id.thermometerView);
-
-        setClearTextView();
     }
 
     /*Метод очистки TextView*/

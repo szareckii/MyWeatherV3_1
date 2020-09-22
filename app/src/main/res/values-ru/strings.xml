@@ -97,4 +97,6 @@
     <string name="turn_on_wifi">Wi-Fi</string>
     <string name="current_position">Текущее местоположение</string>
     <string name="not_supportet">Не поддерживается в Android 5.0</string>
+    <string name="welcome">Добро пожаловать</string>
+    <string name="sign_out">Выйти</string>
 </resources>
